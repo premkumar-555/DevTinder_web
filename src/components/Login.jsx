@@ -1,18 +1,32 @@
 import axios from 'axios';
 import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { addUser } from '../redux/userSlice';
+import { useNavigate } from 'react-router';
+import { authUrl } from '../utils/constants';
 
 const Login = () => {
     const [emailId, setEmailId] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false)
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://localhost:3000/auth/login', {
+            setLoading(true);
+            const res = await axios.post(`${authUrl}/login`, {
                 emailId, password
-            }, { withCredentials: true })
+            }, { withCredentials: true });
+            if (res && res?.data?.data) {
+                dispatch(addUser(res?.data?.data));
+                return navigate('/')
+            }
         } catch (err) {
             console.log("Err @ login : ", err?.message);
+        } finally {
+            setLoading(false);
         }
     }
     return (
@@ -73,7 +87,9 @@ const Login = () => {
                         </div>
                     </div>
                     <div className="card-actions justify-end">
-                        <button className="btn btn-primary" type='submit'>Submit</button>
+                        <button className="btn btn-primary" type='submit'>
+                            {loading ? <span className="loading loading-ring loading-md"></span> : 'Submit'}</button>
+
                     </div>
                 </form>
             </div>

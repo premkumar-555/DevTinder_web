@@ -1,18 +1,39 @@
+import axios from 'axios';
 import React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { authUrl } from '../utils/constants';
+import { useNavigate } from 'react-router';
+import { clearUser } from '../redux/userSlice';
 
 const Navbar = () => {
+    const user = useSelector((state) => (state.user));
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const handleLogout = async () => {
+        try {
+            const res = await axios.post(`${authUrl}/logout`);
+            console.log(res);
+            if (res?.status === 200 || res?.statusText === "OK") {
+                dispatch(clearUser())
+                navigate('/');
+            }
+        } catch (err) {
+            console.log('Err @ logout : ' + err?.message);
+        }
+    }
     return (
         <div className="navbar bg-base-100 shadow-sm">
             <div className="flex-1">
                 <a className="btn btn-ghost text-xl">🧑‍💻 devTinder</a>
             </div>
-            <div className="flex gap-2">
+            {user && <div className="flex gap-2">
                 <div className="dropdown dropdown-end mx-6">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
                             <img
-                                alt="Tailwind CSS Navbar component"
-                                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                                alt="user photo"
+                                src={user?.profileUrl} />
                         </div>
                     </div>
                     <ul
@@ -25,10 +46,10 @@ const Navbar = () => {
                             </a>
                         </li>
                         <li><a>Settings</a></li>
-                        <li><a>Logout</a></li>
+                        <li onClick={handleLogout}><a>Logout</a></li>
                     </ul>
                 </div>
-            </div>
+            </div>}
         </div>
     )
 }

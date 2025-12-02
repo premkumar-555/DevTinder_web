@@ -1,17 +1,27 @@
 import React from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import Profile from './Profile';
 import Login from './Login';
-import Home from './Home';
 import Body from './Body';
+import Feed from './Feed/Feed';
+import { useSelector } from 'react-redux';
+
+const ProtectedRoute = ({ children }) => {
+    const user = useSelector((state) => (state.user));
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+    return children;
+};
+
 
 const AppRoutes = () => {
     return (<>
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Body />}>
-                    <Route index element={<Home />} />
-                    <Route path="profile" element={<Profile />} />
+                    <Route index element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+                    <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     <Route path="login" element={<Login />} />
                 </Route>
             </Routes>
