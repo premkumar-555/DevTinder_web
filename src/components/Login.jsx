@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { addUser } from '../redux/userSlice';
 import { useNavigate } from 'react-router';
-import { authUrl } from '../utils/constants';
+import { AUTH_URL } from '../utils/constants';
 
 const Login = () => {
     const [emailId, setEmailId] = useState("");
@@ -17,7 +17,7 @@ const Login = () => {
         e.preventDefault();
         try {
             setLoading(true);
-            const res = await axios.post(`${authUrl}/login`, {
+            const res = await axios.post(`${AUTH_URL}/login`, {
                 emailId, password
             }, { withCredentials: true });
             if (res && res?.data?.data) {

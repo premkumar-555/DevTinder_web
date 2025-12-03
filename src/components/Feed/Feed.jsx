@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { userUrl } from '../../utils/constants';
+import { USER_URL } from '../../utils/constants';
 import { addFeed } from '../../redux/feedSlice';
 import UserCard from './userCard';
 
@@ -11,7 +11,7 @@ const Feed = () => {
 
     const getFeed = async () => {
         try {
-            const res = await axios.get(userUrl + '/feed', { withCredentials: true });
+            const res = await axios.get(USER_URL + '/feed', { withCredentials: true });
             console.log('res?.data?.data :', res?.data?.data);
             if (res?.data?.data) {
                 dispatch(addFeed(res?.data?.data));
@@ -32,7 +32,7 @@ const Feed = () => {
         <>
             {
                 feed ? (
-                    feed.map((el, ind) => <UserCard user={el} id={ind} />)
+                    <UserCard user={feed[0]} />
                 ) : null
             }
         </>

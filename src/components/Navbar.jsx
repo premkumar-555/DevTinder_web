@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { authUrl } from '../utils/constants';
+import { AUTH_URL } from '../utils/constants';
 import { Link, useNavigate } from 'react-router';
 import { clearUser } from '../redux/userSlice';
 
@@ -13,7 +13,7 @@ const Navbar = () => {
     const handleLogout = async () => {
         setLoading(true)
         try {
-            const res = await axios.post(`${authUrl}/logout`, {}, {
+            const res = await axios.post(`${AUTH_URL}/logout`, {}, {
                 withCredentials: true
             });
             if (res?.status === 200 || res?.statusText === "OK") {

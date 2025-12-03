@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from 'react-router'
 import Footer from './Footer'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
-import { profileUrl } from '../utils/constants'
+import { PROFILE_URL } from '../utils/constants'
 import { addUser } from '../redux/userSlice'
 import { useCookies } from 'react-cookie'
 
@@ -18,7 +18,7 @@ const Body = () => {
     const fetchUser = async () => {
         setLoading(true)
         try {
-            const res = await axios.get(`${profileUrl}/view`, { withCredentials: true });
+            const res = await axios.get(`${PROFILE_URL}/view`, { withCredentials: true });
             if (res?.data?.data) {
                 dispatch(addUser(res?.data?.data));
                 navigate('/');
