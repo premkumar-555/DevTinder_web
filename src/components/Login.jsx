@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { addUser } from '../redux/userSlice';
 import { useNavigate } from 'react-router';
@@ -11,6 +11,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false)
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [error, setError] = useState("");
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -24,11 +25,19 @@ const Login = () => {
                 return navigate('/')
             }
         } catch (err) {
-            console.log("Err @ login : ", err?.message);
+            setError(err?.response?.data?.message || 'Something went wrong!')
+            console.log("Err @ login : ", err || 'Something went wrong!');
         } finally {
             setLoading(false);
         }
     }
+
+    useEffect(() => {
+        if (error) {
+            setError('');
+        }
+    }, [emailId, password])
+
     return (
         <div className="card card-border bg-neutral w-96 mx-auto">
             <div className="card-body">
@@ -86,8 +95,11 @@ const Login = () => {
                             </p>
                         </div>
                     </div>
+                    <p className="text-base text-red-400">
+                        {error}
+                    </p>
                     <div className="card-actions justify-end">
-                        <button className="btn btn-primary" type='submit'>
+                        <button className="btn btn-primary mx-auto my-2" type='submit'>
                             {loading ? <span className="loading loading-ring loading-md"></span> : 'Submit'}</button>
 
                     </div>
