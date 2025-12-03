@@ -1,5 +1,6 @@
-const API_URL = "http://localhost:3000";
+const BASE_URL = "http://localhost:3000";
 
-const authUrl = `${API_URL}/auth`;
+const authUrl = `${BASE_URL}/auth`;
+const profileUrl = `${BASE_URL}/profile`;
 
-export { authUrl };
+export { authUrl, profileUrl };
