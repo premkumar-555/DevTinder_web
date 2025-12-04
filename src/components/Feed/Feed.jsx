@@ -27,13 +27,13 @@ const Feed = () => {
     return (
         <>
             {
-                feed ? (
+                feed && feed?.length > 0 ? (
                     <div className='h-screen bg-base-200 py-6'>
                         <div className='h-125'>
                             <UserCard user={feed[0]} />
                         </div>
                     </div>
-                ) : null
+                ) : <h1 className='text-center text-xl font-bold text-white underline'>No feed found</h1>
             }
         </>
     )

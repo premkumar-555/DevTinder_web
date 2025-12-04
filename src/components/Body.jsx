@@ -7,6 +7,7 @@ import axios from 'axios'
 import { PROFILE_URL } from '../utils/constants'
 import { addUser } from '../redux/userSlice'
 import { useCookies } from 'react-cookie'
+import { ToastContainer } from 'react-toastify'
 
 const Body = () => {
     const user = useSelector((state) => state.user);
@@ -43,6 +44,7 @@ const Body = () => {
     return (
         <div>
             <Navbar />
+            <ToastContainer />
             {loading ? <div className="w-100 h-100 mx-auto flex justify-center content-center">
                 <div className="w-15 h-15 m-auto loading loading-ring loading-5xl"></div>
             </div> : <Outlet />}

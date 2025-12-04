@@ -40,7 +40,7 @@ const Connections = () => {
             <h1 className='text-center text-xl font-bold text-white underline'>Connections</h1>
             <div className='w-125 mx-auto h-140  p-4 overflow-y-auto'>
                 {connections?.map(({ firstName, lastName, age, gender, about, profileUrl }, ind) => (<div key={ind}>
-                    <div className="mx-auto w-100 card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
+                    <div className="mx-auto w-auto card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
                         <figure>
                             <img className='size-25 rounded-full object-cover'
 

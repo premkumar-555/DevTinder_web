@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { PROFILE_URL } from "../utils/constants";
 import { addUser } from "../redux/userSlice";
 import axios from "axios";
-import { toast, ToastContainer } from 'react-toastify';
+import { Toast } from "../utils/toast";
 import { useLocation } from "react-router";
 
 
@@ -29,6 +29,7 @@ const Profile = () => {
     const [error, setError] = useState("");
 
     const handleInputChange = (e) => {
+        error && setError("");
         const { name, value } = e.target;
         setEditInfo((pre) => ({ ...pre, [name]: value }));
     }
@@ -37,14 +38,10 @@ const Profile = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.patch(PROFILE_URL + '/edit', { ...editInfo }, { withCredentials: true })
-            if (res?.data?.data) {
-                toast(res?.data?.message, {
-                    position: "top-center",
-                    type: 'success',
-                    autoClose: 3000,
-                })
-                dispatch(addUser(res?.data?.data));
+            const { data: { data: xData, message } } = await axios.patch(PROFILE_URL + '/edit', { ...editInfo }, { withCredentials: true })
+            if (message) {
+                Toast(message, { type: 'success' });
+                dispatch(addUser(xData));
             }
         } catch (err) {
             setError(err?.response?.data?.message || 'Something went wrong!');
@@ -135,14 +132,14 @@ const Profile = () => {
                         {error}
                     </p>
                     <button className="btn btn-primary mx-auto mt-4" type="submit">
-                        {loading && <span className="loading loading-ring loading-md"></span>}Submit
+                        {loading ? <span className="loading loading-ring loading-md"></span> : 'Submit'}
                     </button>
                 </fieldset>
             </form>
             <div className="h-135 ml-15">
                 <UserCard user={editInfo} curPath={curPath} />
             </div>
-            <ToastContainer />
+
         </div>
 
     );
