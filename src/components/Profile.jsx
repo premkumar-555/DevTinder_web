@@ -26,7 +26,7 @@ const Profile = () => {
     const [loading, setLoading] = useState(false)
     const dispatch = useDispatch();
     const curPath = useLocation()?.pathname;
-    console.log('curPath: : ', curPath);
+    const [error, setError] = useState("");
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -47,6 +47,7 @@ const Profile = () => {
                 dispatch(addUser(res?.data?.data));
             }
         } catch (err) {
+            setError(err?.response?.data?.message || 'Something went wrong!');
             console.log(err);
         } finally {
             setLoading(false);
@@ -59,7 +60,7 @@ const Profile = () => {
                     <h2 className="card-title justify-center text-xl">Edit Profile</h2>
                     <div className="h-100 overflow-y-auto">
                         <label className="label my-2">First Name</label>
-                        <label className="input input-secondary validator">
+                        <label className="input input-secondary validator z-5">
                             <input defaultValue={editInfo?.firstName}
                                 type="text"
                                 required
@@ -130,6 +131,9 @@ const Profile = () => {
                             name='about'
                         ></textarea>
                     </div>
+                    <p className="text-base text-red-400">
+                        {error}
+                    </p>
                     <button className="btn btn-primary mx-auto mt-4" type="submit">
                         {loading && <span className="loading loading-ring loading-md"></span>}Submit
                     </button>
