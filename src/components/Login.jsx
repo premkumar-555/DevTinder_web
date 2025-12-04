@@ -26,7 +26,7 @@ const Login = () => {
             }
         } catch (err) {
             setError(err?.response?.data?.message || 'Something went wrong!')
-            console.log("Err @ login : ", err || 'Something went wrong!');
+            console.error("Err @ login : ", err || 'Something went wrong!');
         } finally {
             setLoading(false);
         }

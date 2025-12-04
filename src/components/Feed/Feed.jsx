@@ -12,13 +12,9 @@ const Feed = () => {
     const getFeed = async () => {
         try {
             const res = await axios.get(USER_URL + '/feed', { withCredentials: true });
-            console.log('res?.data?.data :', res?.data?.data);
             if (res?.data?.data) {
                 dispatch(addFeed(res?.data?.data));
             }
-            setTimeout(() => {
-                console.log('feed :', feed);
-            }, 2000);
         } catch (err) {
             console.console.error(err);
         }
@@ -32,7 +28,11 @@ const Feed = () => {
         <>
             {
                 feed ? (
-                    <UserCard user={feed[0]} />
+                    <div className='h-screen bg-base-200 py-6'>
+                        <div className='h-125'>
+                            <UserCard user={feed[0]} />
+                        </div>
+                    </div>
                 ) : null
             }
         </>

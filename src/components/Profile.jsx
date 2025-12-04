@@ -5,6 +5,7 @@ import { PROFILE_URL } from "../utils/constants";
 import { addUser } from "../redux/userSlice";
 import axios from "axios";
 import { toast, ToastContainer } from 'react-toastify';
+import { useLocation } from "react-router";
 
 
 const Profile = () => {
@@ -24,6 +25,8 @@ const Profile = () => {
     })
     const [loading, setLoading] = useState(false)
     const dispatch = useDispatch();
+    const curPath = useLocation()?.pathname;
+    console.log('curPath: : ', curPath);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -50,9 +53,9 @@ const Profile = () => {
         }
     }
     return (
-        <div className="flex bg-base-200 justify-center content-center border-2 border-white">
-            <form onSubmit={updateProfile}>
-                <fieldset className="fieldset bg-base-100 border-base-300 rounded-box w-sm border p-6">
+        <div className="h-full flex bg-base-200 justify-center items-start p-4">
+            <form onSubmit={updateProfile} className="h-full">
+                <fieldset className="h-full fieldset bg-base-100 border-base-300 rounded-box w-sm border p-6">
                     <h2 className="card-title justify-center text-xl">Edit Profile</h2>
                     <div className="h-100 overflow-y-auto">
                         <label className="label my-2">First Name</label>
@@ -119,7 +122,7 @@ const Profile = () => {
                                 name='profileUrl'
                             />
                         </label>
-                        <p className="validator-hint hidden hidden">Must be valid URL</p>
+                        <p className="validator-hint">Must be valid URL</p>
                         <label className="label  my-2">About</label>
                         <textarea defaultValue={editInfo?.about}
                             className="textarea textarea-secondary"
@@ -132,8 +135,8 @@ const Profile = () => {
                     </button>
                 </fieldset>
             </form>
-            <div className="ml-10">
-                <UserCard user={editInfo} />
+            <div className="h-135 ml-15">
+                <UserCard user={editInfo} curPath={curPath} />
             </div>
             <ToastContainer />
         </div>
