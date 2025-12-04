@@ -5,6 +5,7 @@ import Login from './Login';
 import Body from './Body';
 import Feed from './Feed/Feed';
 import { useSelector } from 'react-redux';
+import Connections from './connections/Connections';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
@@ -22,6 +23,7 @@ const AppRoutes = () => {
                 <Route path="/" element={<Body />}>
                     <Route index element={<ProtectedRoute><Feed /></ProtectedRoute>} />
                     <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                    <Route path="connections" element={<ProtectedRoute><Connections /></ProtectedRoute>} />
                     <Route path="login" element={<Login />} />
                 </Route>
             </Routes>

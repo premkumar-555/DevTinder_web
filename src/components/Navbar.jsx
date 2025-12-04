@@ -48,6 +48,11 @@ const Navbar = () => {
                                 Profile
                             </Link>
                         </li>
+                        <li>
+                            <Link to='/connections' className="justify-between">
+                                Connections
+                            </Link>
+                        </li>
                         <li onClick={handleLogout}>
                             {loading ? <span className="mx-auto loading loading-ring loading-xs"></span> : <a>Logout</a>}
                         </li>
