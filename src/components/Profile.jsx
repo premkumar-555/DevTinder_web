@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserCard from "./Feed/userCard";
 import { useDispatch, useSelector } from "react-redux";
 import { PROFILE_URL } from "../utils/constants";
@@ -18,9 +18,9 @@ const Profile = () => {
     const [editInfo, setEditInfo] = useState({
         firstName,
         lastName,
-        age,
-        gender,
-        about,
+        age: age || '',
+        gender: gender || '',
+        about: about || '',
         profileUrl
     })
     const [loading, setLoading] = useState(false)
@@ -44,12 +44,13 @@ const Profile = () => {
                 dispatch(addUser(xData));
             }
         } catch (err) {
-            setError(err?.response?.data?.message || 'Something went wrong!');
+            setError(err?.response?.data?.message || err?.response?.data || 'Something went wrong!');
             console.error(err);
         } finally {
             setLoading(false);
         }
     }
+
     return (
         <div className="h-full flex bg-base-200 justify-center items-start p-4">
             <form onSubmit={updateProfile} className="h-full">
@@ -105,10 +106,10 @@ const Profile = () => {
                         <select defaultValue={editInfo?.gender} className="select select-secondary"
                             name='gender'
                             onChange={handleInputChange}>
-                            <option disabled={true}>Select Gender</option>
-                            <option defaultValue='male'>Male</option>
-                            <option defaultValue='female'>Female</option>
-                            <option defaultValue='others'>Others</option>
+                            <option >Select Gender</option>
+                            <option value='male'>Male</option>
+                            <option value='female'>Female</option>
+                            <option value='others'>Others</option>
                         </select>
                         <label className="label  my-2">Photo Url</label>
                         <label className="input input-secondary validator">

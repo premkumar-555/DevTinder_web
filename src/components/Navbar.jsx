@@ -18,7 +18,7 @@ const Navbar = () => {
             });
             if (res?.status === 200 || res?.statusText === "OK") {
                 dispatch(clearUser())
-                navigate('/login');
+                navigate('/auth/login');
             }
         } catch (err) {
             console.error(err);

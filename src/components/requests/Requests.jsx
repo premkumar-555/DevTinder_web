@@ -76,7 +76,7 @@ const Requests = () => {
                         <div className="card-body">
                             <h2 className="card-title">{firstName + " " + lastName}</h2>
                             {age && gender && <p>{age + ", " + gender}</p>}
-                            {about && <p>{about}</p>}
+                            <p>{about && about?.length > 150 ? about?.substring(0, 150) + '...' : about}</p>
                         </div>
                         <div className="flex justify-center items-center gap-2">
                             <button className="btn btn-primary" disabled={revLoading} onClick={() => {
