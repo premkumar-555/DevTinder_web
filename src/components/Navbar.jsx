@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AUTH_URL } from '../utils/constants';
 import { Link, useNavigate } from 'react-router';
 import { clearUser } from '../redux/userSlice';
+import { clearFeed } from '../redux/feedSlice';
 
 const Navbar = () => {
     const user = useSelector((state) => (state.user));
@@ -18,6 +19,7 @@ const Navbar = () => {
             });
             if (res?.status === 200 || res?.statusText === "OK") {
                 dispatch(clearUser())
+                dispatch(clearFeed())
                 navigate('/auth/login');
             }
         } catch (err) {
