@@ -8,6 +8,8 @@ const Requests = () => {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(false);
     const [revLoading, setRevLoading] = useState("");
+    const [accepted, rejected] = ['accepted', 'rejected'];
+    const [selectedReqId, setSelectedReqId] = useState(null);
 
     const fetchRequests = async () => {
         setLoading(true);
@@ -27,9 +29,10 @@ const Requests = () => {
     const reviewRequest = async (reqId, status) => {
         try {
             if (!(reqId && status)) {
-                setRevLoading(status);
+
                 return null;
             }
+            setRevLoading(status);
             const { data: { message } } = await axios.post(`${REQUEST_URL}/review/${status}/${reqId}`, {}, { withCredentials: true });
             if (message) {
                 Toast(message, { type: TOAST_SUCCESS });
@@ -62,7 +65,7 @@ const Requests = () => {
     return (
         <div>
             <h1 className='text-center text-xl font-bold text-white underline'>Connection requests</h1>
-            <div className='w-125 mx-auto h-140  p-4 overflow-y-auto'>
+            <div className='w-145 mx-auto h-140  p-4 overflow-y-auto'>
                 {requests?.map(({ _id, fromUserId: { firstName, lastName, age, gender, about, profileUrl } }, ind) => (<div key={ind}>
                     <div className="mx-auto w-auto flex justify-center items-center card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
                         <figure>
@@ -76,13 +79,19 @@ const Requests = () => {
                             {about && <p>{about}</p>}
                         </div>
                         <div className="flex justify-center items-center gap-2">
-                            <button className="btn btn-primary" onClick={() => reviewRequest(_id, 'accepted')}>
-                                {revLoading && revLoading === 'accepted' ? <span className="loading loading-ring loading-md"></span> :
+                            <button className="btn btn-primary" disabled={revLoading} onClick={() => {
+                                reviewRequest(_id, accepted);
+                                setSelectedReqId(_id);
+                            }}>
+                                {(revLoading === accepted && selectedReqId === _id) ? <span className="loading loading-ring loading-md"></span> :
                                     'Accept'}
 
                             </button>
-                            <button className="btn btn-error" onClick={() => reviewRequest(_id, 'rejected')}>
-                                {revLoading && revLoading === 'rejected' ? <span className="loading loading-ring loading-md"></span> :
+                            <button className="btn btn-error" disabled={revLoading} onClick={() => {
+                                reviewRequest(_id, rejected);
+                                setSelectedReqId(_id);
+                            }}>
+                                {(revLoading === rejected && selectedReqId === _id) ? <span className="loading loading-ring loading-md"></span> :
                                     'Reject'}
                             </button>
                         </div>
@@ -91,7 +100,7 @@ const Requests = () => {
                 )}</div>
 
 
-        </div>
+        </div >
     )
 }
 

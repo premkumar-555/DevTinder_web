@@ -4,9 +4,9 @@ export const Toast = (message, { type, position, autoClose }) => {
   return !(message && type)
     ? null
     : toast(message, {
-        position: position || "top-center",
+        position: position || "top-right",
         type: type,
-        autoClose: autoClose || 3000,
+        autoClose: autoClose || 2000,
       });
 };
 

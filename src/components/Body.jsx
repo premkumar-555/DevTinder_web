@@ -14,7 +14,7 @@ const Body = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [{ token: authToken }] = useCookies(['token']);
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
 
     const fetchUser = async () => {
         setLoading(true)

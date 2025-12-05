@@ -1,7 +1,9 @@
 import React from 'react'
 
-const UserCard = ({ user, curPath }) => {
-    const { firstName, lastName, about, age, gender, profileUrl } = user;
+const UserCard = ({ user, curPath, handleRequest, btnLoading }) => {
+    const { _id, firstName, lastName, about, age, gender, profileUrl } = user;
+    const allowedPathsForBtns = ['/'];
+    const [ignored, interested] = ['ignored', 'interested'];
 
     return (
         <div className="h-full mx-auto card card-lg bg-base-100 w-96 shadow-sm ">
@@ -14,9 +16,15 @@ const UserCard = ({ user, curPath }) => {
                 <h2 className="card-title">{`${firstName} ${lastName}`}</h2>
                 {age && gender && <p>{age + ', ' + gender}</p>}
                 <p>{about && about?.length > 150 ? about?.substring(0, 150) + '...' : about}</p>
-                {!(curPath && curPath?.includes('profile')) && <div className="card-actions justify-center my-2">
-                    <button className="btn btn-warning rounded-full">Ignore</button>
-                    <button className="btn btn-secondary rounded-full">Interested</button>
+                {(allowedPathsForBtns.includes(curPath)) && <div className="card-actions justify-center my-2">
+                    <button className="btn btn-warning rounded-full" disabled={btnLoading}
+                        onClick={() => { handleRequest(ignored, _id) }}>
+                        {(btnLoading === ignored) ? <span className="loading loading-ring loading-md"></span> : "Ignore"}
+                    </button>
+                    <button className="btn btn-secondary rounded-full" disabled={btnLoading}
+                        onClick={() => { handleRequest(interested, _id) }}>
+                        {(btnLoading === interested) ? <span className="loading loading-ring loading-md"></span> : "Interested"}
+                    </button>
                 </div>}
 
             </div>

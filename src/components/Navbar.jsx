@@ -21,7 +21,7 @@ const Navbar = () => {
                 navigate('/login');
             }
         } catch (err) {
-            console.log('Err @ logout : ' + err?.message);
+            console.error(err);
         } finally {
             setLoading(false);
         }

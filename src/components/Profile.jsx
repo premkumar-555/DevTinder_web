@@ -45,7 +45,7 @@ const Profile = () => {
             }
         } catch (err) {
             setError(err?.response?.data?.message || 'Something went wrong!');
-            console.log(err);
+            console.error(err);
         } finally {
             setLoading(false);
         }
