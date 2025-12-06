@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { REQUEST_URL, USER_URL } from '../../utils/constants';
 import { addFeed } from '../../redux/feedSlice';
-import UserCard from './userCard';
+import UserCard from './UserCard';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS } from '../../utils/toast';
 import { useLocation } from 'react-router';
 
