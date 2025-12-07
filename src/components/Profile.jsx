@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import UserCard from "./Feed/userCard";
+import React, { useState } from "react";
+import UserCard from "./Feed/UserCard";
 import { useDispatch, useSelector } from "react-redux";
 import { PROFILE_URL } from "../utils/constants";
 import { addUser } from "../redux/userSlice";
