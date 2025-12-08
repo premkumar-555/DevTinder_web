@@ -37,7 +37,7 @@ const Login = () => {
                 return navigate(`${page === 'login' ? '/' : '/profile'}`);
             }
         } catch (err) {
-            setError(err?.response?.data?.message || 'Something went wrong!')
+            setError(err?.response?.data?.message || err?.response?.data || 'Something went wrong!')
             console.error("Err @ login : ", err || 'Something went wrong!');
         } finally {
             setLoading(false);
