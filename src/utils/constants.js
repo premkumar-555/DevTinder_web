@@ -1,4 +1,4 @@
-const BASE_URL = "/api/";
+const BASE_URL = "/api";
 
 const AUTH_URL = `${BASE_URL}/auth`;
 const PROFILE_URL = `${BASE_URL}/profile`;
