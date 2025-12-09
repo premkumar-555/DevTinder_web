@@ -1,4 +1,5 @@
-const BASE_URL = "/api";
+const BASE_URL =
+  location.hostname === "localhost" ? "http://localhost:3000" : "/api";
 
 const AUTH_URL = `${BASE_URL}/auth`;
 const PROFILE_URL = `${BASE_URL}/profile`;
