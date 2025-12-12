@@ -1,6 +1,6 @@
 import React from 'react'
 import { termsConditionsData } from './termsConditions'
-import Template from './template'
+import Template from './Template'
 
 const TermsConditions = () => {
     return (
