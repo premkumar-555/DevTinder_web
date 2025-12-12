@@ -47,7 +47,7 @@ const Body = () => {
             <ToastContainer />
             {loading ? <div className="w-100 h-100 mx-auto flex justify-center content-center">
                 <div className="w-15 h-15 m-auto loading loading-ring loading-5xl"></div>
-            </div> : <div className='w-screen h-screen'>
+            </div> : <div className='w-screen h-screen overflow-y-auto'>
                 <Outlet />
             </div>}
 

@@ -2,7 +2,7 @@ import React from 'react'
 
 const PlanCard = () => {
     return (
-        <div className="card w-96 bg-base-100 shadow-sm">
+        <div className="card w-96 bg-base-200 shadow-sm border border-white">
             <div className="card-body">
                 <span className="badge badge-xs badge-warning">Most Popular</span>
                 <div className="flex justify-between">
@@ -12,11 +12,11 @@ const PlanCard = () => {
                 <ul className="mt-6 flex flex-col gap-2 text-xs">
                     <li>
                         <svg xmlns="http://www.w3.org/2000/svg" className="size-4 me-2 inline-block text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                        <span>High-resolution image generation</span>
+                        <span>Secured user data</span>
                     </li>
                     <li>
                         <svg xmlns="http://www.w3.org/2000/svg" className="size-4 me-2 inline-block text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                        <span>Customizable style templates</span>
+                        <span>Customizable user profile</span>
                     </li>
                     <li>
                         <svg xmlns="http://www.w3.org/2000/svg" className="size-4 me-2 inline-block text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
@@ -24,11 +24,11 @@ const PlanCard = () => {
                     </li>
                     <li>
                         <svg xmlns="http://www.w3.org/2000/svg" className="size-4 me-2 inline-block text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                        <span>AI-driven image enhancements</span>
+                        <span>Seamless messaging</span>
                     </li>
                     <li className="opacity-50">
                         <svg xmlns="http://www.w3.org/2000/svg" className="size-4 me-2 inline-block text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                        <span className="line-through">Seamless cloud integration</span>
+                        <span className="line-through">Voice & Video calling</span>
                     </li>
                     <li className="opacity-50">
                         <svg xmlns="http://www.w3.org/2000/svg" className="size-4 me-2 inline-block text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>

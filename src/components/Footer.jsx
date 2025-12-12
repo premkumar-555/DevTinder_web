@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router'
 
 const Footer = () => {
     return (
@@ -21,18 +22,18 @@ const Footer = () => {
             </aside>
             <nav>
                 <h6 className="footer-title">Company</h6>
-                <a className="link link-hover">About us</a>
-                <a className="link link-hover">Contact</a>
-                <a className="link link-hover">Pricing</a>
+                <a className="link link-hover"><Link to='about'>About us</Link> </a>
+                <a className="link link-hover"><Link to='contact'>Contact</Link></a>
+                <a className="link link-hover"><Link to='pricing'>Pricing</Link></a>
             </nav>
             <nav>
                 <h6 className="footer-title">Legal</h6>
-                <a className="link link-hover">Terms & Conditions</a>
+                <a className="link link-hover"><Link to='terms'>Terms & Conditions</Link></a>
                 <a className="link link-hover">Privacy policy</a>
                 <a className="link link-hover"> Cancellation/Refund Policy</a>
             </nav>
             <p> Copyright © 2025 - All right reserved by DevTinder, Pvt Ltd</p>
-        </footer>
+        </footer >
     )
 }
 
