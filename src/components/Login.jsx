@@ -55,7 +55,7 @@ const Login = () => {
     }, [formData]);
 
     return (
-        <div className="h-full card card-border bg-neutral w-96 mx-auto">
+        <div className="h-auto card card-border bg-neutral w-96 mx-auto">
             <div className="card-body">
                 <h2 className="card-title justify-center text-2xl">{page === 'login' ? 'Login' : 'Sign up'}</h2>
                 <form onSubmit={handleFormSubmit}>

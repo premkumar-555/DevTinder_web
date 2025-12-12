@@ -52,9 +52,9 @@ const Profile = () => {
     }
 
     return (
-        <div className="h-full flex bg-base-200 justify-center items-start p-4">
-            <form onSubmit={updateProfile} className="h-full">
-                <fieldset className="h-full fieldset bg-base-100 border-base-300 rounded-box w-sm border p-6">
+        <div className="h-auto flex bg-base-200 justify-center items-start p-4">
+            <form onSubmit={updateProfile} className="h-auto">
+                <fieldset className="h-auto fieldset bg-base-100 border-base-300 rounded-box w-sm border p-6">
                     <h2 className="card-title justify-center text-xl">Edit Profile</h2>
                     <div className="h-100 overflow-y-auto">
                         <label className="label my-2">First Name</label>
