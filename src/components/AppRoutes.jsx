@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import Connections from './connections/Connections';
 import Requests from './requests/Requests';
 import About from './About';
-import Contact from './contact';
+import Contact from './Contact.jsx';
 import Pricing from './Pricing/Pricing';
 import TermsConditions from './Terms&Conditions/TermsConditions.jsx';
 import PrivacyPolicy from './PrivacyPolicy/PrivacyPolicy';
