@@ -12,7 +12,7 @@ import Contact from './Contact.jsx';
 import Pricing from './Pricing/Pricing';
 import TermsConditions from './Terms&Conditions/TermsConditions.jsx';
 import PrivacyPolicy from './PrivacyPolicy/PrivacyPolicy';
-import CancelRefund from './cancelRefund/cancelRefund.jsx';
+import CancelRefund from './cancelRefund/CancelRefund.jsx';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
