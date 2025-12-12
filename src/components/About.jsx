@@ -5,7 +5,7 @@ const About = () => {
         <div className="hero bg-base-200 ">
             <div className="hero-content flex-col lg:flex-row font-sans">
                 <img
-                    src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp"
+                    src='https://plus.unsplash.com/premium_photo-1685086785636-2a1a0e5b591f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZGV2ZWxvcGVyfGVufDB8fDB8fHww'
                     className="max-w-sm rounded-lg shadow-2xl"
                 />
                 <div className='border-2 border-black'>
