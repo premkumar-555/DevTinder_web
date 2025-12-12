@@ -10,7 +10,9 @@ import Requests from './requests/Requests';
 import About from './About';
 import Contact from './contact';
 import Pricing from './Pricing/Pricing';
-import TermsConditions from './Terms&Conditions/TermsConditions';
+import TermsConditions from './Terms&Conditions/TermsConditions.jsx';
+import PrivacyPolicy from './PrivacyPolicy/PrivacyPolicy';
+import CancelRefund from './cancelRefund/cancelRefund.jsx';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
@@ -34,9 +36,9 @@ const AppRoutes = () => {
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<Contact />} />
                     <Route path="pricing" element={<Pricing />} />
-                    <Route path="privacy" element={<Login />} />
+                    <Route path="privacy" element={<PrivacyPolicy />} />
                     <Route path="terms" element={<TermsConditions />} />
-                    <Route path="refund" element={<Login />} />
+                    <Route path="refund" element={<CancelRefund />} />
                 </Route>
             </Routes>
         </BrowserRouter></>)

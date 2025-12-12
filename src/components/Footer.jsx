@@ -22,16 +22,17 @@ const Footer = () => {
             </aside>
             <nav>
                 <h6 className="footer-title">Company</h6>
-                <a className="link link-hover"><Link to='about'>About us</Link> </a>
-                <a className="link link-hover"><Link to='contact'>Contact</Link></a>
-                <a className="link link-hover"><Link to='pricing'>Pricing</Link></a>
+                <Link className="link link-hover" to='about'>About us </Link>
+                <Link className="link link-hover" to='contact'>Contact</Link>
+                <Link className="link link-hover" to='pricing'>Pricing</Link>
             </nav>
             <nav>
                 <h6 className="footer-title">Legal</h6>
-                <a className="link link-hover"><Link to='terms'>Terms & Conditions</Link></a>
-                <a className="link link-hover">Privacy policy</a>
-                <a className="link link-hover"> Cancellation/Refund Policy</a>
-            </nav>
+                <Link className="link link-hover" to='terms'>Terms & Conditions</Link>
+                <Link className="link link-hover" to='privacy'>Privacy policy</Link>
+                <Link className="link link-hover" to='refund'>Cancellation/Refund Policy</Link>
+
+            </nav >
             <p> Copyright © 2025 - All right reserved by DevTinder, Pvt Ltd</p>
         </footer >
     )
