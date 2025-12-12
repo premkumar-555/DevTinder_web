@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import Connections from './connections/Connections';
 import Requests from './requests/Requests';
 import About from './About';
+import Contact from './contact';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
@@ -29,7 +30,7 @@ const AppRoutes = () => {
                     <Route path="requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
                     <Route path="/auth/:page" element={<Login />} />
                     <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Login />} />
+                    <Route path="/contact" element={<Contact />} />
                     <Route path="/pricing" element={<Login />} />
                     <Route path="/privacy" element={<Login />} />
                     <Route path="/terms" element={<Login />} />
