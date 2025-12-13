@@ -13,6 +13,7 @@ import Pricing from './Pricing/Pricing';
 import TermsConditions from './Terms&Conditions/TermsConditions.jsx';
 import PrivacyPolicy from './PrivacyPolicy/PrivacyPolicy';
 import CancelRefund from './cancelRefund/CancelRefund.jsx';
+import ChatBox from './Chat/ChatBox.jsx';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
@@ -32,6 +33,7 @@ const AppRoutes = () => {
                     <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     <Route path="connections" element={<ProtectedRoute><Connections /></ProtectedRoute>} />
                     <Route path="requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
+                    <Route path="chat/:userId" element={<ProtectedRoute><ChatBox /></ProtectedRoute>} />
                     <Route path="/auth/:page" element={<Login />} />
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<Contact />} />

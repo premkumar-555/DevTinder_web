@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { USER_URL } from '../../utils/constants';
 import axios from 'axios';
 import Loading from '../Loading';
+import { Link } from 'react-router';
 
 const Connections = () => {
     const [connections, setConnections] = useState([]);
@@ -39,8 +40,8 @@ const Connections = () => {
         <div>
             <h1 className='text-center text-xl font-bold text-white underline'>Connections</h1>
             <div className='w-125 mx-auto h-140  p-4 overflow-y-auto'>
-                {connections?.map(({ firstName, lastName, age, gender, about, profileUrl }, ind) => (<div key={ind}>
-                    <div className="mx-auto w-auto card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
+                {connections?.map(({ firstName, lastName, age, gender, about, profileUrl, _id }, ind) => (<div key={ind}>
+                    <div key={_id} className="mx-auto w-auto card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
                         <figure>
                             <img className='size-25 rounded-full object-cover'
 
@@ -52,6 +53,11 @@ const Connections = () => {
                             {age && gender && <p>{age + ", " + gender}</p>}
                             <p>{about && about?.length > 150 ? about?.substring(0, 150) + '...' : about}</p>
                         </div>
+                        <Link to={`/chat/${_id}`} class="btn btn-primary self-center mx-2">
+                            <button >
+                                Chat
+                            </button>
+                        </Link>
                     </div>
                 </div>)
                 )}</div>
