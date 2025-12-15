@@ -6,4 +6,4 @@ const PROFILE_URL = `${BASE_URL}/profile`;
 const USER_URL = `${BASE_URL}/user`;
 const REQUEST_URL = `${BASE_URL}/request`;
 
-export { AUTH_URL, PROFILE_URL, USER_URL, REQUEST_URL };
+export { BASE_URL, AUTH_URL, PROFILE_URL, USER_URL, REQUEST_URL };

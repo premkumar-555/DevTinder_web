@@ -1,8 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router'
+import { createSocketConnection } from '../../utils/socket';
 
 const ChatBox = () => {
-    const { userId } = useParams()
+    const { userId } = useParams();
+    const loggedInUser = useSelector(state => state.user) // This should be fetched from auth context or similar
+
+    useEffect(() => {
+        // As soon as chatbox loads, create socket connection with server
+        const socket = createSocketConnection();
+
+
+        return () => {
+            // Disconnect socket when component unmounts
+            socket.disconnect();
+        }
+    }, []);
+
     return (
         <div className='mx-auto w-1/2 h-9/12'>
             <h1 className='text-xl font-bold px-4 py-2 rounded-full'>Chat box</h1>
