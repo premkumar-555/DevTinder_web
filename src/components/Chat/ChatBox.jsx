@@ -4,9 +4,11 @@ import { useParams } from 'react-router'
 import { createSocket, disconnectSocket } from '../../utils/socket';
 import ChatMessage from './ChatMessage';
 import { useCookies } from 'react-cookie';
+import { CHAT_URL } from '../../utils/constants';
+import axios from 'axios';
 
 const ChatBox = () => {
-    const { userId } = useParams();
+    const { toUserId } = useParams();
     const loggedInUser = useSelector(state => state.user);
     const [newMsg, setNewMsg] = useState('');
     const [messages, setMessages] = useState([]);
@@ -18,26 +20,48 @@ const ChatBox = () => {
     // send new message
     const sendNewMessage = () => {
         if (newMsg.trim() === '') return;
-        if (socket)
-            socket.emit('sendMessage', { toUserId: userId, message: newMsg });
+        if (socket) {
+            socket.emit('newMessage', { toUserId, message: newMsg });
+        }
         setNewMsg('');
     }
+
+    // fetch chat messages
+    const fetchChatMessages = async () => {
+        try {
+            const response = await axios.post(`${CHAT_URL}/view`, { users: [toUserId] }, {
+                withCredentials: true
+            });
+            if (response.status === 200 && response?.data?.data?.messages) {
+                setMessages(response.data.data.messages);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    useEffect(() => {
+        // fetch chat messages
+        fetchChatMessages();
+    }, [])
+
+
 
     useEffect(() => {
         // check for socket init
         if (!loggedInUser) {
             return;
         }
-        // As soon as chatbox loads, create socket connection with server
-
+        // 1. As soon as chatbox loads, create socket connection with server
         socket.connect();
-        // Emit event to join socket to room
-        socket.emit('joinRoom', userId);
-        // Listen for incoming messages in the room
-        socket.on('receiveMessage', (data) => {
-            setMessages((prev) => ([...prev, data]));
-        });
+        // 2. Join user socket to chat room 
+        socket.emit('joinRoom', toUserId);
 
+        // Lsten for incoming messages
+        socket.on('receiveMessage', (message) => {
+            setMessages((prevMessages) => [...prevMessages, message]);
+        });
+        //
         return () => {
             // Disconnect & clear, socket when component unmounts
             disconnectSocket();

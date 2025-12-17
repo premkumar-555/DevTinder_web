@@ -33,7 +33,7 @@ const AppRoutes = () => {
                     <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     <Route path="connections" element={<ProtectedRoute><Connections /></ProtectedRoute>} />
                     <Route path="requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
-                    <Route path="chat/:userId" element={<ProtectedRoute><ChatBox /></ProtectedRoute>} />
+                    <Route path="chat/:toUserId" element={<ProtectedRoute><ChatBox /></ProtectedRoute>} />
                     <Route path="/auth/:page" element={<Login />} />
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<Contact />} />
