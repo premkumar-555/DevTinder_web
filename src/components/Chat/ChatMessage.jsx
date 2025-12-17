@@ -1,20 +1,7 @@
 import React from 'react'
-import { timezone } from '../../utils/constants';
-import { formatInTimeZone } from 'date-fns-tz'
-import { startOfDay } from 'date-fns';
+import { formatTime } from '../../utils/dateHelpers';
 
 const ChatMessage = ({ message, loggedInUser }) => {
-
-    // format date-time in local timezone
-    const formatDate = (date) => {
-        try {
-            const formatStr = `${new Date(date) < startOfDay(new Date()) ? 'dd-MM-yyyy' : ''} HH:mm a`;
-            const istDate = formatInTimeZone(new Date(date), timezone, formatStr);
-            return istDate;
-        } catch (err) {
-            console.log(err);
-        }
-    }
 
     return <>
         {
@@ -30,7 +17,7 @@ const ChatMessage = ({ message, loggedInUser }) => {
                     </div>
                     <div className="chat-header text-black">
                         {`${message?.fromUser?.firstName} ${message?.fromUser?.lastName}`}
-                        <time className="text-xs text-black">{formatDate(message?.createdAt)}</time>
+                        <time className="text-xs text-black">{formatTime(message?.createdAt)}</time>
                     </div>
                     {message?.message && (<>
                         <div className="chat-bubble">{message?.message}</div></>)}
@@ -48,7 +35,7 @@ const ChatMessage = ({ message, loggedInUser }) => {
                             {loggedInUser?.firstName + " " + loggedInUser?.lastName}
                         </div>
                         <div className="chat-bubble">{message?.message}</div>
-                        <div className="chat-footer text-black">{formatDate(message?.createdAt)}</div>
+                        <div className="chat-footer text-black">{formatTime(message?.createdAt)}</div>
                     </div>
                     : null
         }

@@ -6,6 +6,7 @@ import ChatMessage from './ChatMessage';
 import { useCookies } from 'react-cookie';
 import { CHAT_URL } from '../../utils/constants';
 import axios from 'axios';
+import { groupMessagesByCreatedAt } from '../../utils/dateHelpers';
 
 const ChatBox = () => {
     const { toUserId } = useParams();
@@ -13,15 +14,22 @@ const ChatBox = () => {
     const [newMsg, setNewMsg] = useState('');
     const [messages, setMessages] = useState([]);
     const bottomRef = useRef(null);
+    const timerRef = useRef(null);
     const [{ token }] = useCookies(['token']);
     const [socket, setSocket] = useState(createSocket(token));
+    const [isTyping, setIsTyping] = useState(false);
 
+    // handle message input change
+    const handleInputChange = (e) => {
+        socket.emit('typing', toUserId);
+        setNewMsg(e.target.value);
+    }
 
     // send new message
     const sendNewMessage = () => {
         if (newMsg.trim() === '') return;
         if (socket) {
-            socket.emit('newMessage', { toUserId, message: newMsg });
+            socket.emit('sendMessage', { toUserId, message: newMsg });
         }
         setNewMsg('');
     }
@@ -33,7 +41,9 @@ const ChatBox = () => {
                 withCredentials: true
             });
             if (response.status === 200 && response?.data?.data?.messages) {
-                setMessages(response.data.data.messages);
+                // group messages based on their createAt dates
+                const formatedMessages = groupMessagesByCreatedAt(response?.data?.data?.messages);
+                setMessages(formatedMessages);
             }
         } catch (err) {
             console.error(err);
@@ -61,7 +71,17 @@ const ChatBox = () => {
         socket.on('receiveMessage', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });
-        //
+
+        // Listen receiveTyping from server
+        socket.on('receiveTyping', () => {
+            setIsTyping(true);
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+            timerRef.current = setTimeout(() => {
+                setIsTyping(false);
+            }, 1000);
+        })
         return () => {
             // Disconnect & clear, socket when component unmounts
             disconnectSocket();
@@ -79,13 +99,20 @@ const ChatBox = () => {
             <h1 className='text-xl font-bold px-4 py-2 rounded-full'>Chat box</h1>
 
             <div className='w-full h-[500px] border border-purple-400 rounded-xl bg-cyan-400 p-5'>
-                <div ref={bottomRef} className='w-full border-2 border-none h-85/100 rounded-sm overflow-y-auto scroll-smooth'>
-                    {messages.length > 0 && messages.map((message, ind) => (
-                        <ChatMessage key={ind} message={message} loggedInUser={loggedInUser} />
+                <div ref={bottomRef} className='w-full h-85/100 rounded-sm overflow-y-auto scroll-smooth'>
+                    {messages.length > 0 && messages.map((item, ind) => (
+                        <div key={ind} className='w-full'>
+                            <p className='text-info text-md font-bold text-center underline my-2'>{item?.dateInfo}</p>
+                            {item?.messages.map((msg, ind) => (
+                                <ChatMessage key={ind} message={msg} loggedInUser={loggedInUser} />
+                            ))}
+                        </div>
                     ))}
                 </div>
-                <div className='w-full border-base-100 h-15 mt-5 rounded-sm flex items-center justify-center'>
-                    <input value={newMsg} onChange={(e) => setNewMsg(e.target.value)} type="text" placeholder="Type here" className="input w-90/100" />
+
+                <span className={`loading loading-dots loading-md text-black mt-1 ${isTyping ? 'visible' : 'invisible'}`} />
+                <div className='w-full border-base-100 h-15 rounded-sm flex items-center justify-center'>
+                    <input value={newMsg} onChange={(e) => handleInputChange(e)} type="text" placeholder="Type here" className="input w-90/100" />
                     <button className="btn btn-primary self-center mx-2" onClick={sendNewMessage}>Send
                     </button>
                 </div>
