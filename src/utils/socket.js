@@ -17,10 +17,10 @@ export const createSocket = (authToken) => {
         autoConnect: false,
       });
     }
-    // on cloud server platform BASE_URL : backend server url+port
+    // on cloud server platform
     else {
-      socket = io("/api", {
-        path: "/socket.io/",
+      socket = io("/", {
+        path: "/api/socket.io",
         auth: {
           token: authToken,
         },
