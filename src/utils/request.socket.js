@@ -17,7 +17,7 @@ export const createRequestSocket = (authToken) => {
     // on cloud server platform
     else {
       reqSocket = io("/", {
-        path: "/api/socket.io/requests",
+        path: "/api/requests/",
         auth: {
           token: authToken,
         },
