@@ -20,7 +20,7 @@ export const createSocket = (authToken) => {
     // on cloud server platform BASE_URL : backend server url+port
     else {
       socket = io(BASE_URL, {
-        path: "/api/",
+        path: "/api/socket.io/",
         auth: {
           token: authToken,
         },
