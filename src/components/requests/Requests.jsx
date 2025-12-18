@@ -1,7 +1,10 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { REQUEST_URL, USER_URL } from '../../utils/constants';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS, TOAST_WARNING } from '../../utils/toast';
+import { createRequestSocket, disconnectRequestSocket } from '../../utils/request.socket';
+import { useCookies } from 'react-cookie';
+import { useSelector } from 'react-redux';
 
 
 const Requests = () => {
@@ -10,6 +13,12 @@ const Requests = () => {
     const [revLoading, setRevLoading] = useState("");
     const [accepted, rejected] = ['accepted', 'rejected'];
     const [selectedReqId, setSelectedReqId] = useState(null);
+    const reqNotifyRef = useRef(null);
+    const [{ token }] = useCookies(['token']);
+    const [reqSocket, setreqSocket] = useState(createRequestSocket(token));
+    const loggedInUser = useSelector(state => state.user);
+    const acceptNotifyRef = useRef(null);
+
 
     const fetchRequests = async () => {
         setLoading(true);
@@ -26,17 +35,20 @@ const Requests = () => {
         }
     }
 
-    const reviewRequest = async (reqId, status) => {
+    const reviewRequest = async (reqId, status, tarUserId = '') => {
         try {
             if (!(reqId && status)) {
 
                 return null;
             }
             setRevLoading(status);
-            const { data: { message } } = await axios.post(`${REQUEST_URL}/review/${status}/${reqId}`, {}, { withCredentials: true });
-            if (message) {
-                Toast(message, { type: TOAST_SUCCESS });
+            const res = await axios.post(`${REQUEST_URL}/review/${status}/${reqId}`, {}, { withCredentials: true });
+            if (res?.data?.message) {
+                Toast(res?.data?.message, { type: TOAST_SUCCESS });
                 fetchRequests();
+                if (status === accepted && tarUserId) {
+                    reqSocket.emit('acceptRequest', tarUserId)
+                }
             }
         } catch (err) {
             if (err?.response?.data?.message) {
@@ -50,6 +62,24 @@ const Requests = () => {
 
     useEffect(() => {
         fetchRequests();
+
+        // Listen for new connection request
+        reqSocket.connect();
+        reqSocket.on('receiveConnectionRequest', ({ toUserId, fromUserInfo }) => {
+            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
+                if (acceptNotifyRef.current) {
+                    clearTimeout(acceptNotifyRef.current);
+                }
+                acceptNotifyRef.current = setTimeout(() => {
+                    fetchRequests();
+                }, 1000);
+            }
+        });
+
+        return () => {
+            disconnectRequestSocket();
+        }
+
     }, []);
 
     if (loading) {
@@ -66,7 +96,7 @@ const Requests = () => {
         <div>
             <h1 className='text-center text-xl font-bold text-white underline'>Connection requests</h1>
             <div className='w-145 mx-auto h-140  p-4 overflow-y-auto'>
-                {requests?.map(({ _id, fromUserId: { firstName, lastName, age, gender, about, profileUrl } }, ind) => (<div key={ind}>
+                {requests?.map(({ _id, fromUserId: { _id: tarUserId, firstName, lastName, age, gender, about, profileUrl } }, ind) => (<div key={ind}>
                     <div className="mx-auto w-auto flex justify-center items-center card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
                         <figure>
                             <img className='size-25 rounded-full object-cover'
@@ -80,7 +110,7 @@ const Requests = () => {
                         </div>
                         <div className="flex justify-center items-center gap-2">
                             <button className="btn btn-primary" disabled={revLoading} onClick={() => {
-                                reviewRequest(_id, accepted);
+                                reviewRequest(_id, accepted, tarUserId);
                                 setSelectedReqId(_id);
                             }}>
                                 {(revLoading === accepted && selectedReqId === _id) ? <span className="loading loading-ring loading-md"></span> :

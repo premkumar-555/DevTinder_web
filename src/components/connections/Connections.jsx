@@ -1,12 +1,20 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { USER_URL } from '../../utils/constants';
 import axios from 'axios';
 import Loading from '../Loading';
 import { Link } from 'react-router';
+import { createRequestSocket, disconnectRequestSocket } from '../../utils/request.socket'
+import { useCookies } from 'react-cookie';
+import { Toast, TOAST_SUCCESS } from '../../utils/toast';
+import { useSelector } from 'react-redux';
 
 const Connections = () => {
     const [connections, setConnections] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [{ token }] = useCookies(['token']);
+    const [reqSocket, setReqSocket] = useState(createRequestSocket(token));
+    const loggedInUser = useSelector(state => state.user);
+    const acceptNotifyRef = useRef(null);
 
     const fetchConnections = async () => {
         setLoading(true);
@@ -24,6 +32,24 @@ const Connections = () => {
 
     useEffect(() => {
         fetchConnections();
+        // Connect reqSocket to server socket channel
+        reqSocket.connect();
+        // Listen for 'acceptRequest'
+        reqSocket.on('requestAccepted', ({ toUserId, fromUserInfo }) => {
+            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
+                if (acceptNotifyRef.current) {
+                    clearTimeout(acceptNotifyRef.current);
+                }
+                acceptNotifyRef.current = setTimeout(() => {
+                    fetchConnections();
+                }, 1000);
+            }
+        });
+
+        return () => {
+            disconnectRequestSocket();
+        }
+
     }, []);
 
     if (loading) {

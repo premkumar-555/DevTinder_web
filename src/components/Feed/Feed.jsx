@@ -19,6 +19,7 @@ const Feed = () => {
     const [reqSocket, setReqSocket] = useState(createRequestSocket(token));
     const loggedInUser = useSelector(state => state.user);
     const reqNotifyRef = useRef(null);
+    const acceptNotifyRef = useRef(null);
 
     const getFeed = async () => {
         setLoading(true);
@@ -73,6 +74,20 @@ const Feed = () => {
                     const msg = `New request from ${fromUserInfo?.firstName} ${fromUserInfo?.lastName}!`;
                     Toast(msg, { type: TOAST_SUCCESS, autoClose: 5000 });
                     getFeed();
+                }, 1000);
+            }
+        });
+
+        // Listen for 'acceptRequest'
+        reqSocket.on('requestAccepted', ({ toUserId, fromUserInfo }) => {
+            console.log('requestAccepted : ', toUserId, fromUserInfo);
+            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
+                if (acceptNotifyRef.current) {
+                    clearTimeout(acceptNotifyRef.current);
+                }
+                acceptNotifyRef.current = setTimeout(() => {
+                    const msg = `${fromUserInfo?.firstName} ${fromUserInfo?.lastName} accepted your request!`;
+                    Toast(msg, { type: TOAST_SUCCESS, autoClose: 5000 });
                 }, 1000);
             }
         });
