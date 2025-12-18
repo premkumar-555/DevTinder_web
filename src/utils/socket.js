@@ -8,12 +8,25 @@ export const createSocket = (authToken) => {
   }
   // using autoConnect false to have control over connection
   if (!socket) {
-    socket = io(BASE_URL, {
-      auth: {
-        token: authToken,
-      },
-      autoConnect: false,
-    });
+    // on local system
+    if (location.hostname === "localhost") {
+      socket = io(BASE_URL, {
+        auth: {
+          token: authToken,
+        },
+        autoConnect: false,
+      });
+    }
+    // on cloud server platform BASE_URL : backend server url+port
+    else {
+      socket = io(BASE_URL, {
+        path: "/api/",
+        auth: {
+          token: authToken,
+        },
+        autoConnect: false,
+      });
+    }
   }
   return socket;
 };
