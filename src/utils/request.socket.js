@@ -1,16 +1,13 @@
 import { io } from "socket.io-client";
 import { BASE_URL } from "./constants";
-let socket = null;
+let reqSocket = null;
 
-export const createSocket = (authToken) => {
-  if (!authToken) {
-    return;
-  }
+export const createRequestSocket = (authToken) => {
   // using autoConnect false to have control over connection
-  if (!socket) {
+  if (!reqSocket) {
     // on local system
     if (location.hostname === "localhost") {
-      socket = io(BASE_URL, {
+      reqSocket = io(`${BASE_URL}/requests`, {
         auth: {
           token: authToken,
         },
@@ -19,8 +16,8 @@ export const createSocket = (authToken) => {
     }
     // on cloud server platform
     else {
-      socket = io("/", {
-        path: "/api/socket.io",
+      reqSocket = io("/", {
+        path: "/api/requests/socket.io",
         auth: {
           token: authToken,
         },
@@ -28,12 +25,12 @@ export const createSocket = (authToken) => {
       });
     }
   }
-  return socket;
+  return reqSocket;
 };
 
-export const disconnectSocket = () => {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
+export const disconnectRequestSocket = () => {
+  if (reqSocket) {
+    reqSocket.disconnect();
+    reqSocket = null;
   }
 };

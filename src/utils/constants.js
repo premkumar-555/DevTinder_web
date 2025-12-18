@@ -10,6 +10,7 @@ const CHAT_URL = `${BASE_URL}/chat`;
 
 // DATE format timezone
 const timezone = "Asia/Kolkata";
+const Today = "Today";
 
 export {
   BASE_URL,
@@ -19,4 +20,5 @@ export {
   REQUEST_URL,
   CHAT_URL,
   timezone,
+  Today,
 };

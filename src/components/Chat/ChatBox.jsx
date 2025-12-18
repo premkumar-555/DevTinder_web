@@ -4,9 +4,10 @@ import { useParams } from 'react-router'
 import { createSocket, disconnectSocket } from '../../utils/socket';
 import ChatMessage from './ChatMessage';
 import { useCookies } from 'react-cookie';
-import { CHAT_URL } from '../../utils/constants';
+import { CHAT_URL, Today } from '../../utils/constants';
 import axios from 'axios';
 import { groupMessagesByCreatedAt } from '../../utils/dateHelpers';
+import { v4 as uuid } from 'uuid';
 
 const ChatBox = () => {
     const { toUserId } = useParams();
@@ -50,6 +51,28 @@ const ChatBox = () => {
         }
     }
 
+    // handle new message insertion
+    const handleMsgInsertion = (prevMessages, newMsg) => {
+        try {
+            // 1. Check today object exists or not
+            const toDayIndx = prevMessages?.findIndex((item) => item?.dateInfo === Today);
+            if (toDayIndx !== -1) {
+                return prevMessages?.map((item) => (item?.dateInfo === Today ? {
+                    ...item,
+                    messages: [...item.messages, newMsg]
+                } : item))
+            } else {
+                return [...prevMessages, {
+                    createAt: newMsg?.createdAt,
+                    dateInfo: Today,
+                    messages: [newMsg]
+                }]
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     useEffect(() => {
         // fetch chat messages
         fetchChatMessages();
@@ -69,7 +92,7 @@ const ChatBox = () => {
 
         // Lsten for incoming messages
         socket.on('receiveMessage', (message) => {
-            setMessages((prevMessages) => [...prevMessages, message]);
+            setMessages((pre) => (handleMsgInsertion(pre, message)));
         });
 
         // Listen receiveTyping from server
@@ -100,11 +123,11 @@ const ChatBox = () => {
 
             <div className='w-full h-[500px] border border-purple-400 rounded-xl bg-cyan-400 p-5'>
                 <div ref={bottomRef} className='w-full h-85/100 rounded-sm overflow-y-auto scroll-smooth'>
-                    {messages.length > 0 && messages.map((item, ind) => (
-                        <div key={ind} className='w-full'>
+                    {messages.length > 0 && messages?.map((item, ind) => (
+                        <div key={uuid()} className='w-full'>
                             <p className='text-info text-md font-bold text-center underline my-2'>{item?.dateInfo}</p>
-                            {item?.messages.map((msg, ind) => (
-                                <ChatMessage key={ind} message={msg} loggedInUser={loggedInUser} />
+                            {item?.messages?.length > 0 && item?.messages.map((msg, ind) => (
+                                <ChatMessage key={uuid()} message={msg} loggedInUser={loggedInUser} />
                             ))}
                         </div>
                     ))}

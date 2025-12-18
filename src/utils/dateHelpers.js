@@ -1,6 +1,7 @@
 import { subDays } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { timezone } from "./constants";
+import { Today } from "./constants";
 
 // formats date to ist format time HH:mm
 export const formatTime = (date) => {
@@ -36,7 +37,7 @@ export const groupMessagesByCreatedAt = (messages) => {
       const toDate = new Date(subDays(new Date(), 2));
       valueItem.messages = [item];
       if (formatedCreatedAt === formatToISTDate(new Date())) {
-        valueItem.dateInfo = "Today";
+        valueItem.dateInfo = Today;
       } else if (
         formatedCreatedAt === formatToISTDate(new Date(subDays(new Date(), 1)))
       ) {
