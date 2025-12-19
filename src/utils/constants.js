@@ -1,6 +1,9 @@
 const BASE_URL =
   location.hostname === "localhost" ? "http://localhost:3000" : "/api";
 
+const SOCKET_URL =
+  location.hostname === "localhost" ? "http://localhost:3000" : "";
+
 // API URLs
 const AUTH_URL = `${BASE_URL}/auth`;
 const PROFILE_URL = `${BASE_URL}/profile`;
@@ -21,4 +24,5 @@ export {
   CHAT_URL,
   timezone,
   Today,
+  SOCKET_URL,
 };

@@ -1,16 +1,23 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AUTH_URL } from '../utils/constants';
 import { Link, useNavigate } from 'react-router';
 import { clearUser } from '../redux/userSlice';
 import { clearFeed } from '../redux/feedSlice';
+import { mainSocket } from '../utils/sockets';
+import { useCookies } from 'react-cookie';
+import { Toast, TOAST_SUCCESS } from '../utils/toast';
 
 const Navbar = () => {
     const user = useSelector((state) => (state.user));
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const [{ token: authToken }] = useCookies('token');
+    const [socket, setSocket] = useState(mainSocket(authToken));
+
+
     const handleLogout = async () => {
         setLoading(true)
         try {
@@ -20,6 +27,8 @@ const Navbar = () => {
             if (res?.status === 200 || res?.statusText === "OK") {
                 dispatch(clearUser())
                 dispatch(clearFeed())
+                // emit to disconnect all socket connections
+                socket.emit('logOut');
                 navigate('/auth/login');
             }
         } catch (err) {
@@ -28,6 +37,17 @@ const Navbar = () => {
             setLoading(false);
         }
     }
+
+    useEffect(() => {
+        socket.connect();
+
+        return () => {
+            socket.off();
+            socket.disconnect();
+            setSocket(null);
+        }
+    }, [])
+
     return (
         <div className="navbar bg-base-100 shadow-sm">
             <div className="flex-1">

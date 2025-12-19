@@ -3,18 +3,18 @@ import { USER_URL } from '../../utils/constants';
 import axios from 'axios';
 import Loading from '../Loading';
 import { Link } from 'react-router';
-import { createRequestSocket, disconnectRequestSocket } from '../../utils/request.socket'
-import { useCookies } from 'react-cookie';
+import { requestSocket } from '../../utils/sockets';
 import { Toast, TOAST_SUCCESS } from '../../utils/toast';
 import { useSelector } from 'react-redux';
+import { useCookies } from 'react-cookie';
 
 const Connections = () => {
     const [connections, setConnections] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [{ token }] = useCookies(['token']);
-    const [reqSocket, setReqSocket] = useState(createRequestSocket(token));
     const loggedInUser = useSelector(state => state.user);
     const acceptNotifyRef = useRef(null);
+    const [{ token: authToken }] = useCookies('token');
+    const [reqSocket, setReqSocket] = useState(requestSocket(authToken))
 
     const fetchConnections = async () => {
         setLoading(true);
@@ -46,10 +46,17 @@ const Connections = () => {
             }
         });
 
-        return () => {
-            disconnectRequestSocket();
-        }
+        // listen errors 
+        reqSocket.on('error', (err) => {
+            console.error('socket error : ', err);
+        })
 
+        return () => {
+            // disconnect reqSocket
+            reqSocket.off();
+            reqSocket.disconnect();
+            setReqSocket(null);
+        }
     }, []);
 
     if (loading) {

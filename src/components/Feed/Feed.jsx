@@ -6,7 +6,7 @@ import { addFeed } from '../../redux/feedSlice';
 import UserCard from './UserCard';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS } from '../../utils/toast';
 import { useLocation } from 'react-router';
-import { createRequestSocket, disconnectRequestSocket } from '../../utils/request.socket';
+import { requestSocket } from '../../utils/sockets';
 import { useCookies } from 'react-cookie';
 
 const Feed = () => {
@@ -15,11 +15,11 @@ const Feed = () => {
     const [loading, setLoading] = useState(false);
     const [btnLoading, setBtnLoading] = useState(null);
     const curPath = useLocation()?.pathname;
-    const [{ token }] = useCookies(['token']);
-    const [reqSocket, setReqSocket] = useState(createRequestSocket(token));
     const loggedInUser = useSelector(state => state.user);
     const reqNotifyRef = useRef(null);
     const acceptNotifyRef = useRef(null);
+    const [{ token: authToken }] = useCookies('token');
+    const [reqSocket, setReqSocket] = useState(requestSocket(authToken))
 
     const getFeed = async () => {
         setLoading(true);
@@ -71,8 +71,6 @@ const Feed = () => {
                     clearTimeout(reqNotifyRef.current);
                 }
                 reqNotifyRef.current = setTimeout(() => {
-                    const msg = `New request from ${fromUserInfo?.firstName} ${fromUserInfo?.lastName}!`;
-                    Toast(msg, { type: TOAST_SUCCESS, autoClose: 5000 });
                     getFeed();
                 }, 1000);
             }
@@ -92,8 +90,15 @@ const Feed = () => {
             }
         });
 
+        // listen errors 
+        reqSocket.on('error', (err) => {
+            console.error('socket error : ', err);
+        })
+
         return () => {
-            disconnectRequestSocket();
+            reqSocket.off();
+            reqSocket.disconnect();
+            setReqSocket(null);
         }
     }, [])
 

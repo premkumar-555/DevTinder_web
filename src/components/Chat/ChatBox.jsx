@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router'
-import { createSocket, disconnectSocket } from '../../utils/socket';
+import { mainSocket } from '../../utils/sockets';
 import ChatMessage from './ChatMessage';
 import { useCookies } from 'react-cookie';
 import { CHAT_URL, Today } from '../../utils/constants';
@@ -16,9 +16,10 @@ const ChatBox = () => {
     const [messages, setMessages] = useState([]);
     const bottomRef = useRef(null);
     const timerRef = useRef(null);
-    const [{ token }] = useCookies(['token']);
-    const [socket, setSocket] = useState(createSocket(token));
     const [isTyping, setIsTyping] = useState(false);
+    const [{ token: authToken }] = useCookies('token');
+    const [socket, setSocket] = useState(mainSocket(authToken));
+    const [joinRoom, receiveMessage, receiveTyping] = ['joinRoom', 'receiveMessage', 'receiveTyping'];
 
     // handle message input change
     const handleInputChange = (e) => {
@@ -88,15 +89,20 @@ const ChatBox = () => {
         // 1. As soon as chatbox loads, create socket connection with server
         socket.connect();
         // 2. Join user socket to chat room 
-        socket.emit('joinRoom', toUserId);
+        socket.emit(joinRoom, toUserId);
 
         // Lsten for incoming messages
-        socket.on('receiveMessage', (message) => {
+        socket.on(receiveMessage, (message) => {
             setMessages((pre) => (handleMsgInsertion(pre, message)));
         });
 
+        // listen errors 
+        socket.on('error', (err) => {
+            console.error('socket error : ', err);
+        })
+
         // Listen receiveTyping from server
-        socket.on('receiveTyping', () => {
+        socket.on(receiveTyping, () => {
             setIsTyping(true);
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
@@ -105,9 +111,12 @@ const ChatBox = () => {
                 setIsTyping(false);
             }, 1000);
         })
+
         return () => {
             // Disconnect & clear, socket when component unmounts
-            disconnectSocket();
+            socket.off();
+            socket.disconnect();
+            setSocket(null);
         }
     }, []);
 

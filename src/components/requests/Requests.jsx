@@ -2,9 +2,9 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import { REQUEST_URL, USER_URL } from '../../utils/constants';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS, TOAST_WARNING } from '../../utils/toast';
-import { createRequestSocket, disconnectRequestSocket } from '../../utils/request.socket';
-import { useCookies } from 'react-cookie';
+import { requestSocket } from '../../utils/sockets';
 import { useSelector } from 'react-redux';
+import { useCookies } from 'react-cookie';
 
 
 const Requests = () => {
@@ -13,11 +13,10 @@ const Requests = () => {
     const [revLoading, setRevLoading] = useState("");
     const [accepted, rejected] = ['accepted', 'rejected'];
     const [selectedReqId, setSelectedReqId] = useState(null);
-    const reqNotifyRef = useRef(null);
-    const [{ token }] = useCookies(['token']);
-    const [reqSocket, setreqSocket] = useState(createRequestSocket(token));
     const loggedInUser = useSelector(state => state.user);
     const acceptNotifyRef = useRef(null);
+    const [{ token: authToken }] = useCookies('token');
+    const [reqSocket, setReqSocket] = useState(requestSocket(authToken))
 
 
     const fetchRequests = async () => {
@@ -26,7 +25,6 @@ const Requests = () => {
             const res = await axios.get(USER_URL + '/requests/received', { withCredentials: true });
             if (res?.data?.data) {
                 setRequests(res?.data?.data);
-
             }
         } catch (err) {
             console.error(err);
@@ -38,7 +36,6 @@ const Requests = () => {
     const reviewRequest = async (reqId, status, tarUserId = '') => {
         try {
             if (!(reqId && status)) {
-
                 return null;
             }
             setRevLoading(status);
@@ -62,7 +59,6 @@ const Requests = () => {
 
     useEffect(() => {
         fetchRequests();
-
         // Listen for new connection request
         reqSocket.connect();
         reqSocket.on('receiveConnectionRequest', ({ toUserId, fromUserInfo }) => {
@@ -75,11 +71,11 @@ const Requests = () => {
                 }, 1000);
             }
         });
-
         return () => {
-            disconnectRequestSocket();
+            reqSocket.off();
+            reqSocket.disconnect();
+            setReqSocket(null);
         }
-
     }, []);
 
     if (loading) {
