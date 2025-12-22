@@ -13,7 +13,7 @@ const UserCard = ({ user, curPath, handleRequest, btnLoading }) => {
                     alt='user profile' />
             </figure>
             <div className="card-body overflow-hidden overflow-ellipsis p-6">
-                <h2 className="card-title">{`${firstName} ${lastName}`}</h2>
+                <h2 className="card-title">{`${firstName} ${lastName}`} {user?.isOnline && (<span className="badge badge-success badge-xs">online</span>)}</h2>
                 {age && gender && <p>{age + ', ' + gender}</p>}
                 <p>{about && about?.length > 150 ? about?.substring(0, 150) + '...' : about}</p>
                 {(allowedPathsForBtns.includes(curPath)) && <div className="card-actions justify-center my-2">

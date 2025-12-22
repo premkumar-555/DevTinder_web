@@ -4,7 +4,7 @@ export const Toast = (message, { type, position, autoClose }) => {
   return !(message && type)
     ? null
     : toast(message, {
-        position: position || "top-right",
+        position: position || "bottom-right",
         type: type,
         autoClose: autoClose || 2000,
       });

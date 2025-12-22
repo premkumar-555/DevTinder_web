@@ -6,12 +6,13 @@ import { addFeed } from '../../redux/feedSlice';
 import UserCard from './UserCard';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS } from '../../utils/toast';
 import { useLocation } from 'react-router';
-import { requestSocket } from '../../utils/sockets';
+import { mainSocket, requestSocket } from '../../utils/sockets';
 import { useCookies } from 'react-cookie';
 
 const Feed = () => {
     const dispatch = useDispatch();
     const feed = useSelector(state => state.feed);
+    const feedRef = useRef([]);
     const [loading, setLoading] = useState(false);
     const [btnLoading, setBtnLoading] = useState(null);
     const curPath = useLocation()?.pathname;
@@ -20,12 +21,14 @@ const Feed = () => {
     const acceptNotifyRef = useRef(null);
     const [{ token: authToken }] = useCookies('token');
     const [reqSocket, setReqSocket] = useState(requestSocket(authToken))
+    const [socket, setSocket] = useState(mainSocket(authToken))
 
     const getFeed = async () => {
         setLoading(true);
         try {
             const res = await axios.get(USER_URL + '/feed', { withCredentials: true });
             if (res?.data?.data) {
+                fetchOnlineSocketUsers(res?.data?.data);
                 dispatch(addFeed(res?.data?.data));
             }
         } catch (err) {
@@ -59,8 +62,7 @@ const Feed = () => {
         }
     }
 
-    useEffect(() => {
-        getFeed();
+    const handleReqSocket = () => {
         // Connect reqSocket to server socket channel
         reqSocket.connect();
 
@@ -78,7 +80,6 @@ const Feed = () => {
 
         // Listen for 'acceptRequest'
         reqSocket.on('requestAccepted', ({ toUserId, fromUserInfo }) => {
-            console.log('requestAccepted : ', toUserId, fromUserInfo);
             if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
                 if (acceptNotifyRef.current) {
                     clearTimeout(acceptNotifyRef.current);
@@ -94,13 +95,48 @@ const Feed = () => {
         reqSocket.on('error', (err) => {
             console.error('socket error : ', err);
         })
+    }
 
+    const fetchOnlineSocketUsers = (data) => {
+        // emit 'getOnlineUsers' event
+        feedRef.current = data;
+        const userIds = data?.map(el => el._id);
+        socket.emit('getOnlineUsers', userIds);
+    }
+
+    const handleMainSocket = () => {
+        socket.connect();
+        // listen for live users
+        socket.on('onlineUsers', (liveUserIds) => {
+            // update feed users for online
+            const liveUsersSet = new Set([...liveUserIds]);
+            const liveUsers = feedRef?.current?.map((user) => liveUsersSet.has(user._id) ? { ...user, isOnline: true } : user);
+            dispatch(addFeed(liveUsers));
+        });
+
+        // listen for user online event
+        socket.on('userOnline', ({ userId }) => {
+            // is user in current feed
+            const isInFeed = feedRef.current?.find(el => el._id === userId);
+            if (isInFeed) {
+                const updatedFeed = feedRef.current?.map(el => (el._id === isInFeed._id) ? { ...el, isOnline: true } : el);
+                dispatch(addFeed(updatedFeed));
+                feedRef.current = updatedFeed;
+            }
+        })
+    }
+
+    useEffect(() => {
+        handleMainSocket();
+        handleReqSocket();
+        getFeed();
         return () => {
             reqSocket.off();
             reqSocket.disconnect();
-            setReqSocket(null);
+            socket.off();
+            socket.disconnect();
         }
-    }, [])
+    }, []);
 
     if (loading) {
         return (<div className="w-100 h-100 mx-auto flex justify-center content-center">

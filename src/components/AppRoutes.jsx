@@ -14,9 +14,10 @@ import TermsConditions from './Terms&Conditions/TermsConditions.jsx';
 import PrivacyPolicy from './PrivacyPolicy/PrivacyPolicy';
 import CancelRefund from './cancelRefund/CancelRefund.jsx';
 import ChatBox from './Chat/ChatBox.jsx';
-import { requestSocket } from '../utils/sockets.js';
+import { mainSocket, requestSocket } from '../utils/sockets.js';
 import { useCookies } from 'react-cookie';
 import { Toast, TOAST_SUCCESS } from '../utils/toast.js';
+import MessageNotification from './Chat/messageNotification.jsx';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
@@ -25,8 +26,9 @@ const ProtectedRoute = ({ children }) => {
     const acceptNotifyRef = useRef(null);
     const [{ token: authToken }] = useCookies('token');
     const [reqSocket, setReqSocket] = useState(requestSocket(authToken));
+    const [socket, setsocket] = useState(mainSocket(authToken));
 
-    useEffect(() => {
+    const handleReqSocket = () => {
         // Connect reqSocket to server socket channel
         reqSocket.connect();
 
@@ -60,11 +62,29 @@ const ProtectedRoute = ({ children }) => {
         reqSocket.on('error', (err) => {
             console.error('socket error : ', err);
         })
+    }
 
+    const initSocket = () => {
+        socket.connect();
+        // Join user to all existing chat rooms to listen new message
+        socket.emit('joinChatRooms');
+        // Lsten for incoming messages
+        socket.on('receiveMessage', ({ fromUser, message }) => {
+            if (loggedInUser?._id?.toString() !== fromUser?._id?.toString() &&
+                !location.pathname.startsWith('/chat')) {
+                MessageNotification({ fromUser, message });
+            }
+        });
+    }
+
+    useEffect(() => {
+        initSocket();
+        handleReqSocket();
         return () => {
             reqSocket.off();
             reqSocket.disconnect();
-            setReqSocket(null);
+            socket.off();
+            socket.disconnect();
         }
     }, [])
 

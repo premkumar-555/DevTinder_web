@@ -28,7 +28,7 @@ const Navbar = () => {
                 dispatch(clearUser())
                 dispatch(clearFeed())
                 // emit to disconnect all socket connections
-                socket.emit('logOut');
+                socket.disconnect();
                 navigate('/auth/login');
             }
         } catch (err) {
@@ -44,7 +44,6 @@ const Navbar = () => {
         return () => {
             socket.off();
             socket.disconnect();
-            setSocket(null);
         }
     }, [])
 

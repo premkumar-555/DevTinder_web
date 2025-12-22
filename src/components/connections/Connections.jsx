@@ -3,7 +3,7 @@ import { USER_URL } from '../../utils/constants';
 import axios from 'axios';
 import Loading from '../Loading';
 import { Link } from 'react-router';
-import { requestSocket } from '../../utils/sockets';
+import { mainSocket, requestSocket } from '../../utils/sockets';
 import { Toast, TOAST_SUCCESS } from '../../utils/toast';
 import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
@@ -14,7 +14,8 @@ const Connections = () => {
     const loggedInUser = useSelector(state => state.user);
     const acceptNotifyRef = useRef(null);
     const [{ token: authToken }] = useCookies('token');
-    const [reqSocket, setReqSocket] = useState(requestSocket(authToken))
+    const [reqSocket, setReqSocket] = useState(requestSocket(authToken));
+    const [socket, setSocket] = useState(mainSocket(authToken));
 
     const fetchConnections = async () => {
         setLoading(true);
@@ -22,6 +23,9 @@ const Connections = () => {
             const res = await axios.get(USER_URL + '/connections', { withCredentials: true });
             if (res?.data?.data) {
                 setConnections(res?.data?.data);
+                // emit 'getOnlineUsers' event
+                const userIds = res?.data?.data?.map(el => el._id);
+                socket.emit('getOnlineUsers', userIds);
             }
         } catch (err) {
             console.error(err);
@@ -30,8 +34,7 @@ const Connections = () => {
         }
     }
 
-    useEffect(() => {
-        fetchConnections();
+    const handleReqSocket = () => {
         // Connect reqSocket to server socket channel
         reqSocket.connect();
         // Listen for 'acceptRequest'
@@ -50,12 +53,40 @@ const Connections = () => {
         reqSocket.on('error', (err) => {
             console.error('socket error : ', err);
         })
+    }
+
+    const handleMainSocket = () => {
+        socket.connect();
+        // listen for live users
+        socket.on('onlineUsers', (liveUserIds) => {
+            // update feed users for online
+            const liveUsersSet = new Set([...liveUserIds]);
+            setConnections((pre) => {
+                return pre?.map((user) => (liveUsersSet.has(user._id)) ? { ...user, isOnline: true } : user)
+            });
+        });
+
+        // listen for user online event
+        socket.on('userOnline', ({ userId }) => {
+            // is user in current feed
+            const isInFeed = connections?.find(el => el._id === userId);
+            if (isInFeed) {
+                setConnections((pre) => (pre?.map(el => (el._id === isInFeed._id) ? { ...el, isOnline: true } : el)));
+            }
+        })
+    }
+
+    useEffect(() => {
+        handleReqSocket();
+        handleMainSocket();
+        fetchConnections();
 
         return () => {
             // disconnect reqSocket
             reqSocket.off();
             reqSocket.disconnect();
-            setReqSocket(null);
+            socket.off();
+            socket.disconnect();
         }
     }, []);
 
@@ -73,14 +104,13 @@ const Connections = () => {
         <div>
             <h1 className='text-center text-xl font-bold text-white underline'>Connections</h1>
             <div className='w-125 mx-auto h-140  p-4 overflow-y-auto'>
-                {connections?.map(({ firstName, lastName, age, gender, about, profileUrl, _id }, ind) => (<div key={ind}>
-                    <div key={_id} className="mx-auto w-auto card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
-                        <figure>
-                            <img className='size-25 rounded-full object-cover'
-
-                                src={profileUrl}
-                                alt="user photo" />
-                        </figure>
+                {connections?.map(({ firstName, lastName, age, gender, about, profileUrl, _id, isOnline }, ind) => (<div key={ind}>
+                    <div key={_id} className="flex justify-center items-center mx-auto w-auto card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
+                        <div className={`avatar ${isOnline === true ? 'avatar-online avatar-placeholder' : ''}`}>
+                            <div className="size-24 rounded-full">
+                                <img src={profileUrl} alt="user photo" />
+                            </div>
+                        </div>
                         <div className="card-body">
                             <h2 className="card-title">{firstName + " " + lastName}</h2>
                             {age && gender && <p>{age + ", " + gender}</p>}
@@ -96,7 +126,7 @@ const Connections = () => {
                 )}</div>
 
 
-        </div>
+        </div >
     )
 }
 

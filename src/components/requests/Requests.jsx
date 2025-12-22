@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import { REQUEST_URL, USER_URL } from '../../utils/constants';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS, TOAST_WARNING } from '../../utils/toast';
-import { requestSocket } from '../../utils/sockets';
+import { mainSocket, requestSocket } from '../../utils/sockets';
 import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
 
@@ -17,7 +17,7 @@ const Requests = () => {
     const acceptNotifyRef = useRef(null);
     const [{ token: authToken }] = useCookies('token');
     const [reqSocket, setReqSocket] = useState(requestSocket(authToken))
-
+    const [socket, setSocket] = useState(mainSocket(authToken));
 
     const fetchRequests = async () => {
         setLoading(true);
@@ -25,6 +25,9 @@ const Requests = () => {
             const res = await axios.get(USER_URL + '/requests/received', { withCredentials: true });
             if (res?.data?.data) {
                 setRequests(res?.data?.data);
+                // emit 'getOnlineUsers' event
+                const userIds = res?.data?.data?.map(el => el?.fromUserId?._id);
+                socket.emit('getOnlineUsers', userIds);
             }
         } catch (err) {
             console.error(err);
@@ -57,8 +60,26 @@ const Requests = () => {
         }
     }
 
-    useEffect(() => {
-        fetchRequests();
+    const handleMainSocket = () => {
+        socket.connect();
+        // listen for live users
+        socket.on('onlineUsers', (liveUserIds) => {
+            // update feed users for online
+            const liveUsersSet = new Set([...liveUserIds]);
+            setRequests((pre) => pre?.map((user) => (liveUsersSet.has(user?.fromUserId?._id) ? { ...user, isOnline: true } : user)))
+        });
+
+        // listen for user online event
+        socket.on('userOnline', ({ userId }) => {
+            // is user in current feed
+            const isInFeed = requests?.find(el => el._id?.toString() === userId?.toString());
+            if (isInFeed) {
+                setRequests((pre) => pre?.map((el) => el._id === isInFeed._id ? { ...el, isOnline: true } : el))
+            }
+        })
+    }
+
+    const handleReqSocket = () => {
         // Listen for new connection request
         reqSocket.connect();
         reqSocket.on('receiveConnectionRequest', ({ toUserId, fromUserInfo }) => {
@@ -71,10 +92,17 @@ const Requests = () => {
                 }, 1000);
             }
         });
+    }
+
+    useEffect(() => {
+        handleMainSocket();
+        handleReqSocket();
+        fetchRequests();
+
         return () => {
             reqSocket.off();
             reqSocket.disconnect();
-            setReqSocket(null);
+            socket.disconnect();
         }
     }, []);
 
@@ -92,13 +120,13 @@ const Requests = () => {
         <div>
             <h1 className='text-center text-xl font-bold text-white underline'>Connection requests</h1>
             <div className='w-145 mx-auto h-140  p-4 overflow-y-auto'>
-                {requests?.map(({ _id, fromUserId: { _id: tarUserId, firstName, lastName, age, gender, about, profileUrl } }, ind) => (<div key={ind}>
+                {requests?.map(({ _id, fromUserId: { _id: tarUserId, firstName, lastName, age, gender, about, profileUrl }, isOnline }, ind) => (<div key={ind}>
                     <div className="mx-auto w-auto flex justify-center items-center card card-side bg-base-300 shadow-sm border-2 border-secondary p-2 mt-4">
-                        <figure>
-                            <img className='size-25 rounded-full object-cover'
-                                src={profileUrl}
-                                alt="user photo" />
-                        </figure>
+                        <div className={`avatar ${isOnline === true ? 'avatar-online avatar-placeholder' : ''}`}>
+                            <div className="size-24 rounded-full">
+                                <img src={profileUrl} alt="user photo" />
+                            </div>
+                        </div>
                         <div className="card-body">
                             <h2 className="card-title">{firstName + " " + lastName}</h2>
                             {age && gender && <p>{age + ", " + gender}</p>}
