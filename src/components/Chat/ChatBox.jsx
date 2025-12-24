@@ -23,7 +23,9 @@ const ChatBox = () => {
 
     // handle message input change
     const handleInputChange = (e) => {
-        socket.emit('typing', toUserId);
+        if (socket) {
+            socket.emit('typing', toUserId);
+        }
         setNewMsg(e.target.value);
     }
 
@@ -54,38 +56,32 @@ const ChatBox = () => {
 
     // handle new message insertion
     const handleMsgInsertion = (prevMessages, newMsg) => {
+        console.log('newMsg got : ', newMsg);
         try {
             // 1. Check today object exists or not
             const toDayIndx = prevMessages?.findIndex((item) => item?.dateInfo === Today);
             if (toDayIndx !== -1) {
-                return prevMessages?.map((item) => (item?.dateInfo === Today ? {
+                const res = prevMessages?.map((item) => (item?.dateInfo === Today ? {
                     ...item,
                     messages: [...item.messages, newMsg]
                 } : item))
+                console.log('res 1 : ', res);
+                return res;
             } else {
-                return [...prevMessages, {
+                const res = [...prevMessages, {
                     createAt: newMsg?.createdAt,
                     dateInfo: Today,
                     messages: [newMsg]
                 }]
+                console.log('res 2 : ', res);
+                return res;
             }
         } catch (err) {
             console.error(err);
         }
     }
 
-    useEffect(() => {
-        // fetch chat messages
-        fetchChatMessages();
-    }, [])
-
-
-
-    useEffect(() => {
-        // check for socket init
-        if (!loggedInUser) {
-            return;
-        }
+    const handleSocket = () => {
         // 1. As soon as chatbox loads, create socket connection with server
         socket.connect();
         // 2. Join user socket to chat room 
@@ -93,6 +89,7 @@ const ChatBox = () => {
 
         // Lsten for incoming messages
         socket.on(receiveMessage, (message) => {
+            console.log('receiveMessage : ', message);
             setMessages((pre) => (handleMsgInsertion(pre, message)));
         });
 
@@ -111,14 +108,19 @@ const ChatBox = () => {
                 setIsTyping(false);
             }, 1000);
         })
+    }
+
+    useEffect(() => {
+        handleSocket();
+        fetchChatMessages();
 
         return () => {
             // Disconnect & clear, socket when component unmounts
-            socket.off();
             socket.disconnect();
-            setSocket(null);
         }
-    }, []);
+    }, [toUserId])
+
+
 
     useEffect(() => {
         if (bottomRef?.current) {

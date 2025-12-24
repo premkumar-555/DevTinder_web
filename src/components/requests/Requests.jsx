@@ -72,11 +72,16 @@ const Requests = () => {
         // listen for user online event
         socket.on('userOnline', ({ userId }) => {
             // is user in current feed
-            const isInFeed = requests?.find(el => el._id?.toString() === userId?.toString());
-            if (isInFeed) {
-                setRequests((pre) => pre?.map((el) => el._id === isInFeed._id ? { ...el, isOnline: true } : el))
-            }
+            setRequests((pre) => pre?.map((el) => el?.fromUserId?._id === userId ? { ...el, isOnline: true } : el))
         })
+
+        // listen for user offline event
+        socket.on('userOffline', ({ userId }) => {
+            // is user in current feed
+            setRequests(pre => (pre?.map(user => user?.fromUserId?._id === userId ? { ...user, isOnline: false } : user)));
+        });
+
+
     }
 
     const handleReqSocket = () => {

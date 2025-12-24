@@ -69,10 +69,13 @@ const Connections = () => {
         // listen for user online event
         socket.on('userOnline', ({ userId }) => {
             // is user in current feed
-            const isInFeed = connections?.find(el => el._id === userId);
-            if (isInFeed) {
-                setConnections((pre) => (pre?.map(el => (el._id === isInFeed._id) ? { ...el, isOnline: true } : el)));
-            }
+            setConnections((pre) => (pre?.map(el => (el._id === userId) ? { ...el, isOnline: true } : el)));
+        })
+
+        // listen for user offline event
+        socket.on('userOffline', ({ userId }) => {
+            // is user in current feed
+            setConnections((pre) => (pre?.map(user => user._id === userId ? { ...user, isOnline: false } : user)));
         })
     }
 

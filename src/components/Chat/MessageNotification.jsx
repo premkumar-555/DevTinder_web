@@ -1,26 +1,28 @@
 import React from 'react'
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
+import { NEW_MESSAGE } from '../../utils/constants'
 
-const ChatToastContent = ({ fromUser, message }) => {
+const ChatToastContent = ({ payload }) => {
+    const { type, fromUser: { _id, firstName, lastName }, info } = payload;
     const navigate = useNavigate();
 
     const handleRedirect = () => {
-        navigate(`/chat/${fromUser?._id?.toString()}`);
+        navigate(`/chat/${_id?.toString()}`);
         toast.dismiss();
     };
 
     return (
         <div style={{ display: "flex", flexDirection: "column" }}>
-            <div className="badge badge-info text-md badge-md mx-0">New message</div>
+            {type === NEW_MESSAGE && <div className="badge badge-info text-md badge-md mx-0">New message</div>}
             <div className='pl-2'>
-                <strong className='text-black font-bold text-sm'>{`${fromUser?.firstName} ${fromUser?.lastName}`}</strong>
+                {type === NEW_MESSAGE && <strong className='text-black font-bold text-sm'>{`${firstName} ${lastName}`}</strong>}
                 <p style={{ margin: "4px 0", color: "#555" }} className='text-sm'>
-                    {message?.length > 150 ? `${message?.substring(0, 150)}...` : message}
+                    {info}
                 </p>
             </div>
 
-            <span className='pl-2'
+            {!location.pathname.includes(`/chat/${_id}`) && <span className='pl-2'
                 onClick={handleRedirect}
                 style={{
                     marginTop: "6px",
@@ -31,20 +33,29 @@ const ChatToastContent = ({ fromUser, message }) => {
                 }}
             >
                 Open Chat →
-            </span>
+            </span>}
         </div>
     );
 };
 
-const MessageNotification = ({ fromUser, message }) => {
-    toast(
-        <ChatToastContent fromUser={fromUser} message={message} />,
-        {
-            className: "chat-toast",
-            position: "bottom-right",
+const MessageNotification = ({ payload }) => {
+
+    if (payload?.type === NEW_MESSAGE) {
+        return toast(
+            <ChatToastContent payload={payload} />,
+            {
+                className: "chat-toast",
+                position: "bottom-right",
+                autoClose: false,
+            }
+        );
+    } else {
+        toast(<p style={{ fontSize: '14px' }}>{payload.info}</p>, {
+            type: 'info',
             autoClose: 3000,
-        }
-    );
+            position: "bottom-right",
+        })
+    }
 }
 
 

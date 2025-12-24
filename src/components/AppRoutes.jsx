@@ -66,15 +66,16 @@ const ProtectedRoute = ({ children }) => {
 
     const initSocket = () => {
         socket.connect();
-        // Join user to all existing chat rooms to listen new message
-        socket.emit('joinChatRooms');
-        // Lsten for incoming messages
-        socket.on('receiveMessage', ({ fromUser, message }) => {
-            if (loggedInUser?._id?.toString() !== fromUser?._id?.toString() &&
-                !location.pathname.startsWith('/chat')) {
-                MessageNotification({ fromUser, message });
+        // Listen newNotification event
+        socket.on('newNotification', (payload) => {
+            console.log('newNotification: ', payload);
+            const { fromUser: { _id } } = payload;
+            console.log('check at notification : ', location.pathname, _id);
+            if (!location.pathname.includes((`/chat/${_id?.toString()}`))) {
+                return MessageNotification({ payload });
             }
         });
+
     }
 
     useEffect(() => {

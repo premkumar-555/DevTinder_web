@@ -124,6 +124,12 @@ const Feed = () => {
                 feedRef.current = updatedFeed;
             }
         })
+
+        // listen for user offline event
+        socket.on('userOffline', ({ userId }) => {
+            // is user in current feed
+            dispatch(addFeed((feedRef.current?.map(user => user._id === userId ? { ...user, isOnline: false } : user))));
+        })
     }
 
     useEffect(() => {

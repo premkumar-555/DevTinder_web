@@ -15,6 +15,10 @@ const CHAT_URL = `${BASE_URL}/chat`;
 const timezone = "Asia/Kolkata";
 const Today = "Today";
 
+const NEW_MESSAGE = "newMessage";
+const NEW_REQUEST = "newRequest";
+const REQUEST_ACCEPTED = "requestAccepted";
+
 export {
   BASE_URL,
   AUTH_URL,
@@ -25,4 +29,7 @@ export {
   timezone,
   Today,
   SOCKET_URL,
+  NEW_MESSAGE,
+  NEW_REQUEST,
+  REQUEST_ACCEPTED,
 };
