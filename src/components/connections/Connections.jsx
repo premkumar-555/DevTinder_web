@@ -120,7 +120,7 @@ const Connections = () => {
                             <p>{about && about?.length > 150 ? about?.substring(0, 150) + '...' : about}</p>
                         </div>
                         <Link to={`/chat/${_id}`} class="btn btn-primary self-center mx-2">
-                            <button >
+                            <button>
                                 Chat
                             </button>
                         </Link>

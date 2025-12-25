@@ -56,7 +56,6 @@ const ChatBox = () => {
 
     // handle new message insertion
     const handleMsgInsertion = (prevMessages, newMsg) => {
-        console.log('newMsg got : ', newMsg);
         try {
             // 1. Check today object exists or not
             const toDayIndx = prevMessages?.findIndex((item) => item?.dateInfo === Today);
@@ -65,7 +64,6 @@ const ChatBox = () => {
                     ...item,
                     messages: [...item.messages, newMsg]
                 } : item))
-                console.log('res 1 : ', res);
                 return res;
             } else {
                 const res = [...prevMessages, {
@@ -73,7 +71,6 @@ const ChatBox = () => {
                     dateInfo: Today,
                     messages: [newMsg]
                 }]
-                console.log('res 2 : ', res);
                 return res;
             }
         } catch (err) {

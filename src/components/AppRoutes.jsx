@@ -68,9 +68,7 @@ const ProtectedRoute = ({ children }) => {
         socket.connect();
         // Listen newNotification event
         socket.on('newNotification', (payload) => {
-            console.log('newNotification: ', payload);
             const { fromUser: { _id } } = payload;
-            console.log('check at notification : ', location.pathname, _id);
             if (!location.pathname.includes((`/chat/${_id?.toString()}`))) {
                 return MessageNotification({ payload });
             }
