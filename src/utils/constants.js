@@ -19,6 +19,8 @@ const NEW_MESSAGE = "newMessage";
 const NEW_REQUEST = "newRequest";
 const REQUEST_ACCEPTED = "requestAccepted";
 
+const NEW_NOTIFICATION = "newNotification";
+
 export {
   BASE_URL,
   AUTH_URL,
@@ -32,4 +34,5 @@ export {
   NEW_MESSAGE,
   NEW_REQUEST,
   REQUEST_ACCEPTED,
+  NEW_NOTIFICATION,
 };

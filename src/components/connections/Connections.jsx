@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { USER_URL } from '../../utils/constants';
+import { NEW_NOTIFICATION, NEW_REQUEST, REQUEST_ACCEPTED, USER_URL } from '../../utils/constants';
 import axios from 'axios';
 import Loading from '../Loading';
 import { Link } from 'react-router';
@@ -11,10 +11,7 @@ import { useCookies } from 'react-cookie';
 const Connections = () => {
     const [connections, setConnections] = useState([]);
     const [loading, setLoading] = useState(false);
-    const loggedInUser = useSelector(state => state.user);
-    const acceptNotifyRef = useRef(null);
     const [{ token: authToken }] = useCookies('token');
-    const [reqSocket, setReqSocket] = useState(requestSocket(authToken));
     const [socket, setSocket] = useState(mainSocket(authToken));
 
     const fetchConnections = async () => {
@@ -32,27 +29,6 @@ const Connections = () => {
         } finally {
             setLoading(false);
         }
-    }
-
-    const handleReqSocket = () => {
-        // Connect reqSocket to server socket channel
-        reqSocket.connect();
-        // Listen for 'acceptRequest'
-        reqSocket.on('requestAccepted', ({ toUserId, fromUserInfo }) => {
-            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
-                if (acceptNotifyRef.current) {
-                    clearTimeout(acceptNotifyRef.current);
-                }
-                acceptNotifyRef.current = setTimeout(() => {
-                    fetchConnections();
-                }, 1000);
-            }
-        });
-
-        // listen errors 
-        reqSocket.on('error', (err) => {
-            console.error('socket error : ', err);
-        })
     }
 
     const handleMainSocket = () => {
@@ -77,17 +53,21 @@ const Connections = () => {
             // is user in current feed
             setConnections((pre) => (pre?.map(user => user._id === userId ? { ...user, isOnline: false } : user)));
         })
+
+        // listen new notifications 
+        socket.on(NEW_NOTIFICATION, (payload) => {
+            // if current user get new request refresh
+            if (payload?.type === REQUEST_ACCEPTED) {
+                fetchConnections();
+            }
+        });
     }
 
     useEffect(() => {
-        handleReqSocket();
         handleMainSocket();
         fetchConnections();
 
         return () => {
-            // disconnect reqSocket
-            reqSocket.off();
-            reqSocket.disconnect();
             socket.off();
             socket.disconnect();
         }

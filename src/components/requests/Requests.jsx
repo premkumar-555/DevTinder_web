@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
-import { REQUEST_URL, USER_URL } from '../../utils/constants';
+import { NEW_NOTIFICATION, NEW_REQUEST, REQUEST_URL, USER_URL } from '../../utils/constants';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS, TOAST_WARNING } from '../../utils/toast';
 import { mainSocket, requestSocket } from '../../utils/sockets';
 import { useSelector } from 'react-redux';
@@ -16,7 +16,6 @@ const Requests = () => {
     const loggedInUser = useSelector(state => state.user);
     const acceptNotifyRef = useRef(null);
     const [{ token: authToken }] = useCookies('token');
-    const [reqSocket, setReqSocket] = useState(requestSocket(authToken))
     const [socket, setSocket] = useState(mainSocket(authToken));
 
     const fetchRequests = async () => {
@@ -46,9 +45,6 @@ const Requests = () => {
             if (res?.data?.message) {
                 Toast(res?.data?.message, { type: TOAST_SUCCESS });
                 fetchRequests();
-                if (status === accepted && tarUserId) {
-                    reqSocket.emit('acceptRequest', tarUserId)
-                }
             }
         } catch (err) {
             if (err?.response?.data?.message) {
@@ -81,32 +77,21 @@ const Requests = () => {
             setRequests(pre => (pre?.map(user => user?.fromUserId?._id === userId ? { ...user, isOnline: false } : user)));
         });
 
-
-    }
-
-    const handleReqSocket = () => {
-        // Listen for new connection request
-        reqSocket.connect();
-        reqSocket.on('receiveConnectionRequest', ({ toUserId, fromUserInfo }) => {
-            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
-                if (acceptNotifyRef.current) {
-                    clearTimeout(acceptNotifyRef.current);
-                }
-                acceptNotifyRef.current = setTimeout(() => {
-                    fetchRequests();
-                }, 1000);
+        // listen new notifications 
+        socket.on(NEW_NOTIFICATION, (payload) => {
+            // if current user get new request refresh
+            if (payload?.type === NEW_REQUEST) {
+                fetchRequests();
             }
         });
+
     }
 
     useEffect(() => {
         handleMainSocket();
-        handleReqSocket();
         fetchRequests();
 
         return () => {
-            reqSocket.off();
-            reqSocket.disconnect();
             socket.disconnect();
         }
     }, []);

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { REQUEST_URL, USER_URL } from '../../utils/constants';
+import { NEW_NOTIFICATION, NEW_REQUEST, REQUEST_URL, USER_URL } from '../../utils/constants';
 import { addFeed } from '../../redux/feedSlice';
 import UserCard from './UserCard';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS } from '../../utils/toast';
@@ -16,11 +16,7 @@ const Feed = () => {
     const [loading, setLoading] = useState(false);
     const [btnLoading, setBtnLoading] = useState(null);
     const curPath = useLocation()?.pathname;
-    const loggedInUser = useSelector(state => state.user);
-    const reqNotifyRef = useRef(null);
-    const acceptNotifyRef = useRef(null);
     const [{ token: authToken }] = useCookies('token');
-    const [reqSocket, setReqSocket] = useState(requestSocket(authToken))
     const [socket, setSocket] = useState(mainSocket(authToken))
 
     const getFeed = async () => {
@@ -47,7 +43,6 @@ const Feed = () => {
             const res = await axios.post(REQUEST_URL + `/send/${status}/${userId}`, {}, { withCredentials: true });
             if (res?.data?.message) {
                 if (status === 'interested') {
-                    reqSocket.emit('sendConnectionRequest', userId);
                     Toast(res.data.message, { type: TOAST_SUCCESS });
                 }
                 getFeed();
@@ -62,40 +57,6 @@ const Feed = () => {
         }
     }
 
-    const handleReqSocket = () => {
-        // Connect reqSocket to server socket channel
-        reqSocket.connect();
-
-        // Listen for 'receiveConnectionRequest'
-        reqSocket.on('receiveConnectionRequest', ({ toUserId, fromUserInfo }) => {
-            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
-                if (reqNotifyRef.current) {
-                    clearTimeout(reqNotifyRef.current);
-                }
-                reqNotifyRef.current = setTimeout(() => {
-                    getFeed();
-                }, 1000);
-            }
-        });
-
-        // Listen for 'acceptRequest'
-        reqSocket.on('requestAccepted', ({ toUserId, fromUserInfo }) => {
-            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
-                if (acceptNotifyRef.current) {
-                    clearTimeout(acceptNotifyRef.current);
-                }
-                acceptNotifyRef.current = setTimeout(() => {
-                    const msg = `${fromUserInfo?.firstName} ${fromUserInfo?.lastName} accepted your request!`;
-                    Toast(msg, { type: TOAST_SUCCESS, autoClose: 5000 });
-                }, 1000);
-            }
-        });
-
-        // listen errors 
-        reqSocket.on('error', (err) => {
-            console.error('socket error : ', err);
-        })
-    }
 
     const fetchOnlineSocketUsers = (data) => {
         // emit 'getOnlineUsers' event
@@ -130,15 +91,20 @@ const Feed = () => {
             // is user in current feed
             dispatch(addFeed((feedRef.current?.map(user => user._id === userId ? { ...user, isOnline: false } : user))));
         })
+
+        // listen new notifications 
+        socket.on(NEW_NOTIFICATION, (payload) => {
+            // if current user get new request refresh
+            if (payload?.type === NEW_REQUEST) {
+                getFeed();
+            }
+        });
     }
 
     useEffect(() => {
         handleMainSocket();
-        handleReqSocket();
         getFeed();
         return () => {
-            reqSocket.off();
-            reqSocket.disconnect();
             socket.off();
             socket.disconnect();
         }

@@ -18,6 +18,7 @@ import { mainSocket, requestSocket } from '../utils/sockets.js';
 import { useCookies } from 'react-cookie';
 import { Toast, TOAST_SUCCESS } from '../utils/toast.js';
 import MessageNotification from './Chat/messageNotification.jsx';
+import { NEW_NOTIFICATION } from '../utils/constants.js';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
@@ -67,7 +68,7 @@ const ProtectedRoute = ({ children }) => {
     const initSocket = () => {
         socket.connect();
         // Listen newNotification event
-        socket.on('newNotification', (payload) => {
+        socket.on(NEW_NOTIFICATION, (payload) => {
             const { fromUser: { _id } } = payload;
             if (!location.pathname.includes((`/chat/${_id?.toString()}`))) {
                 return MessageNotification({ payload });
