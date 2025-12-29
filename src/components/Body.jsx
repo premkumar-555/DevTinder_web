@@ -8,7 +8,7 @@ import { NEW_NOTIFICATION, PROFILE_URL } from '../utils/constants'
 import { addUser } from '../redux/userSlice'
 import { useCookies } from 'react-cookie'
 import { ToastContainer } from 'react-toastify'
-import MessageNotification from './Chat/messageNotification'
+import MessageNotification from './Chat/MessageNotification'
 import { mainSocket } from '../utils/sockets'
 
 const Body = () => {
