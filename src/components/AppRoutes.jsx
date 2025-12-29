@@ -1,4 +1,3 @@
-import React, { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import Profile from './Profile';
 import Login from './Login';
@@ -14,45 +13,15 @@ import TermsConditions from './Terms&Conditions/TermsConditions.jsx';
 import PrivacyPolicy from './PrivacyPolicy/PrivacyPolicy';
 import CancelRefund from './cancelRefund/CancelRefund.jsx';
 import ChatBox from './Chat/ChatBox.jsx';
-import { mainSocket } from '../utils/sockets.js';
-import { useCookies } from 'react-cookie';
-import { Toast, TOAST_SUCCESS } from '../utils/toast.js';
-import MessageNotification from './Chat/messageNotification.jsx';
-import { NEW_NOTIFICATION } from '../utils/constants.js';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
-    const [{ token: authToken }] = useCookies('token');
-    const [socket, setsocket] = useState(mainSocket(authToken));
-
-    const initSocket = () => {
-        socket.connect();
-        // Listen newNotification event
-        socket.on(NEW_NOTIFICATION, (payload) => {
-            console.log('NEW_NOTIFICATION : ', payload);
-            const { fromUser: { _id } } = payload;
-            if (!location.pathname.includes((`/chat/${_id?.toString()}`))) {
-                return MessageNotification({ payload });
-            }
-        });
-
-    }
-
-    useEffect(() => {
-        initSocket();
-
-        return () => {
-            socket.off(NEW_NOTIFICATION);
-            socket.disconnect();
-        }
-    }, [])
 
     if (!user) {
         return <Navigate to="/auth/login" replace />;
     }
     return children;
 };
-
 
 const AppRoutes = () => {
     return (<>
