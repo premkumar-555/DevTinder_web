@@ -13,9 +13,38 @@ import TermsConditions from './Terms&Conditions/TermsConditions.jsx';
 import PrivacyPolicy from './PrivacyPolicy/PrivacyPolicy';
 import CancelRefund from './cancelRefund/CancelRefund.jsx';
 import ChatBox from './Chat/ChatBox.jsx';
+import MessageNotification from './Chat/MessageNotification.jsx';
+import { NEW_NOTIFICATION } from '../utils/constants.js';
+import { useCookies } from 'react-cookie';
+import { useEffect, useState } from 'react';
+import { mainSocket } from '../utils/sockets.js';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
+    const [{ token: authToken }] = useCookies(['token']);
+    const [socket, setsocket] = useState(mainSocket(authToken));
+
+    const initSocket = () => {
+        socket.connect();
+        console.log('socket connected...?');
+        // Listen newNotification event
+        socket.on(NEW_NOTIFICATION, (payload) => {
+            const { fromUser: { _id } } = payload;
+            if (!location.pathname.includes((`/chat/${_id?.toString()}`))) {
+                return MessageNotification({ payload });
+            }
+        });
+
+    }
+
+    useEffect(() => {
+        initSocket();
+
+        return () => {
+            socket.off(NEW_NOTIFICATION);
+            socket.disconnect();
+        }
+    }, [])
 
     if (!user) {
         return <Navigate to="/auth/login" replace />;
