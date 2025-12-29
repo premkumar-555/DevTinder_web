@@ -4,10 +4,12 @@ import { Outlet, useNavigate } from 'react-router'
 import Footer from './Footer'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
-import { PROFILE_URL } from '../utils/constants'
+import { NEW_NOTIFICATION, PROFILE_URL } from '../utils/constants'
 import { addUser } from '../redux/userSlice'
 import { useCookies } from 'react-cookie'
 import { ToastContainer } from 'react-toastify'
+import MessageNotification from './Chat/messageNotification'
+import { mainSocket } from '../utils/sockets'
 
 const Body = () => {
     const user = useSelector((state) => state.user);
@@ -15,6 +17,20 @@ const Body = () => {
     const navigate = useNavigate();
     const [{ token: authToken }] = useCookies(['token']);
     const [loading, setLoading] = useState(false);
+    const [socket, setsocket] = useState(mainSocket(authToken));
+
+    const initSocket = () => {
+        socket.connect();
+        console.log('socket connected...?');
+        // Listen newNotification event
+        socket.on(NEW_NOTIFICATION, (payload) => {
+            const { fromUser: { _id } } = payload;
+            if (!location.pathname.includes((`/chat/${_id?.toString()}`))) {
+                return MessageNotification({ payload });
+            }
+        });
+
+    }
 
     const fetchUser = async () => {
         setLoading(true)
@@ -40,6 +56,15 @@ const Body = () => {
             fetchUser();
         }
     }, []);
+
+    useEffect(() => {
+        initSocket();
+
+        return () => {
+            socket.off(NEW_NOTIFICATION);
+            socket.disconnect();
+        }
+    }, [])
 
     return (
         <div>

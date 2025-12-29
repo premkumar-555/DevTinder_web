@@ -1,8 +1,8 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
-import { NEW_NOTIFICATION, NEW_REQUEST, REQUEST_URL, USER_URL } from '../../utils/constants';
+import { NEW_NOTIFICATION, NEW_REQUEST, ONLINE_USERS, REQUEST_URL, USER_OFFLINE, USER_ONLINE, USER_URL } from '../../utils/constants';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS, TOAST_WARNING } from '../../utils/toast';
-import { mainSocket, requestSocket } from '../../utils/sockets';
+import { mainSocket } from '../../utils/sockets';
 import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
 
@@ -57,22 +57,21 @@ const Requests = () => {
     }
 
     const handleMainSocket = () => {
-        socket.connect();
         // listen for live users
-        socket.on('onlineUsers', (liveUserIds) => {
+        socket.on(ONLINE_USERS, (liveUserIds) => {
             // update feed users for online
             const liveUsersSet = new Set([...liveUserIds]);
             setRequests((pre) => pre?.map((user) => (liveUsersSet.has(user?.fromUserId?._id) ? { ...user, isOnline: true } : user)))
         });
 
         // listen for user online event
-        socket.on('userOnline', ({ userId }) => {
+        socket.on(USER_ONLINE, ({ userId }) => {
             // is user in current feed
             setRequests((pre) => pre?.map((el) => el?.fromUserId?._id === userId ? { ...el, isOnline: true } : el))
         })
 
         // listen for user offline event
-        socket.on('userOffline', ({ userId }) => {
+        socket.on(USER_OFFLINE, ({ userId }) => {
             // is user in current feed
             setRequests(pre => (pre?.map(user => user?.fromUserId?._id === userId ? { ...user, isOnline: false } : user)));
         });
@@ -92,7 +91,7 @@ const Requests = () => {
         fetchRequests();
 
         return () => {
-            socket.disconnect();
+            [ONLINE_USERS, USER_ONLINE, USER_OFFLINE].forEach(el => socket.off(el));
         }
     }, []);
 

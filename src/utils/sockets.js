@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
-import { SOCKET_URL } from "./constants";
-import { getCookie } from "./cookies";
+import { CHAT_SOCKET, SOCKET_URL, MAIN_SOCKET } from "./constants";
+// sockets registry
+const socketRegistry = new Map();
 
 // socket connection configs
 const socketConfigOptions = {
@@ -10,15 +11,8 @@ const socketConfigOptions = {
   },
 };
 
-// Handle dynamic config options for cloud host
-const getSocketUrl = (namespace) => {
-  if (location.hostname !== "localhost") {
-    socketConfigOptions.path = "/api/socket.io/";
-  }
-};
-
 // socket client creator
-const createSocket = (namespace, token) => {
+const createSocket = (namespace, token, socketName) => {
   // Default socket url dynamic for both local/cloud host platforms
   let socketUrl = `${SOCKET_URL}`;
   socketConfigOptions.auth.token = token;
@@ -30,11 +24,14 @@ const createSocket = (namespace, token) => {
   } else {
     socketUrl = `${socketUrl}/${namespace}`;
   }
-  return io(socketUrl, socketConfigOptions);
+  if (!socketRegistry.has(socketName)) {
+    socketRegistry.set(socketName, io(socketUrl, socketConfigOptions));
+  }
+  return socketRegistry.get(socketName);
 };
 
 // Main namespace
-export const mainSocket = (token) => createSocket("", token);
+export const mainSocket = (token) => createSocket("", token, MAIN_SOCKET);
 
-// Request namespace
-export const requestSocket = (token) => createSocket("requests", token);
+// Chat namespace
+export const chatSocket = (token) => createSocket("", token, CHAT_SOCKET);

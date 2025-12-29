@@ -1,12 +1,12 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { NEW_NOTIFICATION, NEW_REQUEST, REQUEST_URL, USER_URL } from '../../utils/constants';
+import { NEW_NOTIFICATION, NEW_REQUEST, ONLINE_USERS, REQUEST_URL, USER_OFFLINE, USER_ONLINE, USER_URL } from '../../utils/constants';
 import { addFeed } from '../../redux/feedSlice';
 import UserCard from './UserCard';
 import { Toast, TOAST_ERROR, TOAST_SUCCESS } from '../../utils/toast';
 import { useLocation } from 'react-router';
-import { mainSocket, requestSocket } from '../../utils/sockets';
+import { mainSocket } from '../../utils/sockets';
 import { useCookies } from 'react-cookie';
 
 const Feed = () => {
@@ -66,9 +66,9 @@ const Feed = () => {
     }
 
     const handleMainSocket = () => {
-        socket.connect();
+
         // listen for live users
-        socket.on('onlineUsers', (liveUserIds) => {
+        socket.on(ONLINE_USERS, (liveUserIds) => {
             // update feed users for online
             const liveUsersSet = new Set([...liveUserIds]);
             const liveUsers = feedRef?.current?.map((user) => liveUsersSet.has(user._id) ? { ...user, isOnline: true } : user);
@@ -76,7 +76,7 @@ const Feed = () => {
         });
 
         // listen for user online event
-        socket.on('userOnline', ({ userId }) => {
+        socket.on(USER_ONLINE, ({ userId }) => {
             // is user in current feed
             const isInFeed = feedRef.current?.find(el => el._id === userId);
             if (isInFeed) {
@@ -87,7 +87,7 @@ const Feed = () => {
         })
 
         // listen for user offline event
-        socket.on('userOffline', ({ userId }) => {
+        socket.on(USER_OFFLINE, ({ userId }) => {
             // is user in current feed
             dispatch(addFeed((feedRef.current?.map(user => user._id === userId ? { ...user, isOnline: false } : user))));
         })
@@ -104,9 +104,9 @@ const Feed = () => {
     useEffect(() => {
         handleMainSocket();
         getFeed();
+
         return () => {
-            socket.off();
-            socket.disconnect();
+            [ONLINE_USERS, USER_ONLINE, USER_OFFLINE].forEach(el => socket.off(el));
         }
     }, []);
 

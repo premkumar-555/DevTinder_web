@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router'
-import { mainSocket } from '../../utils/sockets';
+import { chatSocket, mainSocket } from '../../utils/sockets';
 import ChatMessage from './ChatMessage';
 import { useCookies } from 'react-cookie';
 import { CHAT_URL, Today } from '../../utils/constants';
@@ -18,7 +18,7 @@ const ChatBox = () => {
     const timerRef = useRef(null);
     const [isTyping, setIsTyping] = useState(false);
     const [{ token: authToken }] = useCookies('token');
-    const [socket, setSocket] = useState(mainSocket(authToken));
+    const [socket, setSocket] = useState(chatSocket(authToken));
     const [joinRoom, receiveMessage, receiveTyping] = ['joinRoom', 'receiveMessage', 'receiveTyping'];
 
     // handle message input change
@@ -79,14 +79,14 @@ const ChatBox = () => {
     }
 
     const handleSocket = () => {
-        // 1. As soon as chatbox loads, create socket connection with server
+        // 1. Connect seperate socket for chat to refresh new chat each time
         socket.connect();
+
         // 2. Join user socket to chat room 
         socket.emit(joinRoom, toUserId);
 
         // Lsten for incoming messages
         socket.on(receiveMessage, (message) => {
-            console.log('receiveMessage : ', message);
             setMessages((pre) => (handleMsgInsertion(pre, message)));
         });
 
@@ -112,10 +112,10 @@ const ChatBox = () => {
         fetchChatMessages();
 
         return () => {
-            // Disconnect & clear, socket when component unmounts
+            socket.off();
             socket.disconnect();
         }
-    }, [toUserId])
+    }, [toUserId]);
 
 
 

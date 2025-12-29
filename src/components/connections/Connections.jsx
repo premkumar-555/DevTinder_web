@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { NEW_NOTIFICATION, NEW_REQUEST, REQUEST_ACCEPTED, USER_URL } from '../../utils/constants';
+import { NEW_NOTIFICATION, NEW_REQUEST, ONLINE_USERS, REQUEST_ACCEPTED, USER_OFFLINE, USER_ONLINE, USER_URL } from '../../utils/constants';
 import axios from 'axios';
 import Loading from '../Loading';
 import { Link } from 'react-router';
-import { mainSocket, requestSocket } from '../../utils/sockets';
+import { mainSocket } from '../../utils/sockets';
 import { Toast, TOAST_SUCCESS } from '../../utils/toast';
-import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
 
 const Connections = () => {
@@ -32,9 +31,8 @@ const Connections = () => {
     }
 
     const handleMainSocket = () => {
-        socket.connect();
         // listen for live users
-        socket.on('onlineUsers', (liveUserIds) => {
+        socket.on(ONLINE_USERS, (liveUserIds) => {
             // update feed users for online
             const liveUsersSet = new Set([...liveUserIds]);
             setConnections((pre) => {
@@ -43,13 +41,13 @@ const Connections = () => {
         });
 
         // listen for user online event
-        socket.on('userOnline', ({ userId }) => {
+        socket.on(USER_ONLINE, ({ userId }) => {
             // is user in current feed
             setConnections((pre) => (pre?.map(el => (el._id === userId) ? { ...el, isOnline: true } : el)));
         })
 
         // listen for user offline event
-        socket.on('userOffline', ({ userId }) => {
+        socket.on(USER_OFFLINE, ({ userId }) => {
             // is user in current feed
             setConnections((pre) => (pre?.map(user => user._id === userId ? { ...user, isOnline: false } : user)));
         })
@@ -68,8 +66,7 @@ const Connections = () => {
         fetchConnections();
 
         return () => {
-            socket.off();
-            socket.disconnect();
+            [ONLINE_USERS, USER_ONLINE, USER_OFFLINE].forEach(el => socket.off(el));
         }
     }, []);
 

@@ -14,7 +14,7 @@ import TermsConditions from './Terms&Conditions/TermsConditions.jsx';
 import PrivacyPolicy from './PrivacyPolicy/PrivacyPolicy';
 import CancelRefund from './cancelRefund/CancelRefund.jsx';
 import ChatBox from './Chat/ChatBox.jsx';
-import { mainSocket, requestSocket } from '../utils/sockets.js';
+import { mainSocket } from '../utils/sockets.js';
 import { useCookies } from 'react-cookie';
 import { Toast, TOAST_SUCCESS } from '../utils/toast.js';
 import MessageNotification from './Chat/messageNotification.jsx';
@@ -22,53 +22,14 @@ import { NEW_NOTIFICATION } from '../utils/constants.js';
 
 const ProtectedRoute = ({ children }) => {
     const user = useSelector((state) => (state.user));
-    const reqNotifyRef = useRef(null);
-    const loggedInUser = useSelector(state => state.user);
-    const acceptNotifyRef = useRef(null);
     const [{ token: authToken }] = useCookies('token');
-    const [reqSocket, setReqSocket] = useState(requestSocket(authToken));
     const [socket, setsocket] = useState(mainSocket(authToken));
-
-    const handleReqSocket = () => {
-        // Connect reqSocket to server socket channel
-        reqSocket.connect();
-
-        // Listen for 'receiveConnectionRequest'
-        reqSocket.on('receiveConnectionRequest', ({ toUserId, fromUserInfo }) => {
-            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
-                if (reqNotifyRef.current) {
-                    clearTimeout(reqNotifyRef.current);
-                }
-                reqNotifyRef.current = setTimeout(() => {
-                    const msg = `New request from ${fromUserInfo?.firstName} ${fromUserInfo?.lastName}!`;
-                    Toast(msg, { type: TOAST_SUCCESS, autoClose: 5000 });
-                }, 1000);
-            }
-        });
-
-        // Listen for 'acceptRequest'
-        reqSocket.on('requestAccepted', ({ toUserId, fromUserInfo }) => {
-            if (toUserId === loggedInUser?._id && fromUserInfo && Object.values(fromUserInfo)?.length > 0) {
-                if (acceptNotifyRef.current) {
-                    clearTimeout(acceptNotifyRef.current);
-                }
-                acceptNotifyRef.current = setTimeout(() => {
-                    const msg = `${fromUserInfo?.firstName} ${fromUserInfo?.lastName} accepted your request!`;
-                    Toast(msg, { type: TOAST_SUCCESS, autoClose: 5000 });
-                }, 1000);
-            }
-        });
-
-        // listen errors 
-        reqSocket.on('error', (err) => {
-            console.error('socket error : ', err);
-        })
-    }
 
     const initSocket = () => {
         socket.connect();
         // Listen newNotification event
         socket.on(NEW_NOTIFICATION, (payload) => {
+            console.log('NEW_NOTIFICATION : ', payload);
             const { fromUser: { _id } } = payload;
             if (!location.pathname.includes((`/chat/${_id?.toString()}`))) {
                 return MessageNotification({ payload });
@@ -79,11 +40,9 @@ const ProtectedRoute = ({ children }) => {
 
     useEffect(() => {
         initSocket();
-        handleReqSocket();
+
         return () => {
-            reqSocket.off();
-            reqSocket.disconnect();
-            socket.off();
+            socket.off(NEW_NOTIFICATION);
             socket.disconnect();
         }
     }, [])

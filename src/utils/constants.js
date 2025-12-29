@@ -18,8 +18,14 @@ const Today = "Today";
 const NEW_MESSAGE = "newMessage";
 const NEW_REQUEST = "newRequest";
 const REQUEST_ACCEPTED = "requestAccepted";
-
 const NEW_NOTIFICATION = "newNotification";
+
+const MAIN_SOCKET = "mainSocket";
+const CHAT_SOCKET = "requestSocket";
+
+const ONLINE_USERS = "onlineUsers";
+const USER_ONLINE = "userOnline";
+const USER_OFFLINE = "userOffline";
 
 export {
   BASE_URL,
@@ -35,4 +41,9 @@ export {
   NEW_REQUEST,
   REQUEST_ACCEPTED,
   NEW_NOTIFICATION,
+  MAIN_SOCKET,
+  CHAT_SOCKET,
+  ONLINE_USERS,
+  USER_ONLINE,
+  USER_OFFLINE,
 };

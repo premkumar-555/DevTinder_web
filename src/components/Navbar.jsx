@@ -38,15 +38,6 @@ const Navbar = () => {
         }
     }
 
-    useEffect(() => {
-        socket.connect();
-
-        return () => {
-            socket.off();
-            socket.disconnect();
-        }
-    }, [])
-
     return (
         <div className="navbar bg-base-100 shadow-sm">
             <div className="flex-1">
